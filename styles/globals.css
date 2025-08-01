@@ -2,8 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer components {
-  .btn {
-    @apply px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700;
-  }
+/* animation delay helpers */
+.animate-delay-2000 { animation-delay: 2s; }
+.animate-delay-4000 { animation-delay: 4s; }
+
+/* blob shared class */
+.blob {
+  @apply absolute h-96 w-96 rounded-full opacity-25 blur-3xl animate-blob;
 }
+@keyframes pulse-fast {
+  0%, 100% { opacity: .4; }
+  50%      { opacity: 1; }
+}
+.animate-pulse-fast { animation: pulse-fast 1.2s ease-in-out infinite; }
+
+@keyframes fade-in-slow {
+  from { opacity: 0; }
+  to   { opacity: .9; }
+}
+.animate-fade-in-slow { animation: fade-in-slow 0.4s forwards; }

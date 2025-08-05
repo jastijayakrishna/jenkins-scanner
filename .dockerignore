@@ -1,0 +1,22 @@
+# Ignore files for Docker
+.git
+.gitignore
+.next
+.dockerignore
+Dockerfile
+docker-compose.yml
+node_modules
+npm-debug.log
+README.md
+.env.local
+.env.local.example
+.env.production.local
+.env.development.local
+__tests__
+coverage
+.vscode
+.idea
+*.log
+.DS_Store
+*.swp
+*.swo

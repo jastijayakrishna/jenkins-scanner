@@ -21,3 +21,48 @@
   to   { opacity: .9; }
 }
 .animate-fade-in-slow { animation: fade-in-slow 0.4s forwards; }
+
+/* New animations for converter */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.animate-fade-in { animation: fade-in 0.3s ease-out; }
+
+@keyframes slide-up {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to   { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-slide-up { animation: slide-up 0.5s ease-out; }
+
+/* Code block styling */
+pre code {
+  white-space: pre;
+  word-wrap: normal;
+  overflow-x: auto;
+}
+
+/* Custom scrollbar for code blocks */
+pre::-webkit-scrollbar {
+  height: 6px;
+}
+
+pre::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
+
+pre::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 3px;
+}
+
+pre::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.5);
+}

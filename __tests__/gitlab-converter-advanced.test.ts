@@ -286,7 +286,7 @@ node {
       
       // Parameters still converted
       expect(yaml).toContain('BRANCH: "main"')
-      expect(yaml).toContain('ENVIRONMENT: ""')
+      expect(yaml).toContain('ENVIRONMENT: "dev"')  // First choice should be default
       
       // Parallel builds detected
       expect(yaml).toContain('Build Java')

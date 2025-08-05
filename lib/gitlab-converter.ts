@@ -122,11 +122,21 @@ const getStagesForComplexity = (tier: string, isScripted: boolean, pluginHits: A
 }
 
 // Generate job templates based on detected plugins
-const generateJobs = (scanResult: ScanResult, stages: string[]): Record<string, GitLabJob> => {
+const generateJobs = (scanResult: ScanResult, stages: string[], features?: any): Record<string, GitLabJob> => {
   const jobs: Record<string, GitLabJob> = {}
   
+  // Helper function to add timeout if available
+  const addTimeout = (job: GitLabJob) => {
+    if (features?.timeout) {
+      const timeoutUnit = features.timeout.unit === 'MINUTES' ? 'm' : 
+                         features.timeout.unit === 'HOURS' ? 'h' : 's'
+      ;(job as any).timeout = `${features.timeout.time}${timeoutUnit}`
+    }
+    return job
+  }
+  
   // Build stage
-  jobs['build:app'] = {
+  jobs['build:app'] = addTimeout({
     stage: 'build',
     script: [
       'echo "Building application..."',
@@ -135,11 +145,11 @@ const generateJobs = (scanResult: ScanResult, stages: string[]): Record<string, 
       scanResult.pluginHits.find(p => p.key === 'npm') ? 'npm install && npm run build' :
       'echo "Add your build commands here"'
     ]
-  }
+  })
   
   // Test stage
   if (stages.includes('test')) {
-    jobs['test:unit'] = {
+    jobs['test:unit'] = addTimeout({
       stage: 'test',
       script: [
         'echo "Running tests..."',
@@ -148,7 +158,7 @@ const generateJobs = (scanResult: ScanResult, stages: string[]): Record<string, 
         scanResult.pluginHits.find(p => p.key === 'npm') ? 'npm test' :
         'echo "Add your test commands here"'
       ]
-    }
+    })
     
     if (scanResult.pluginHits.find(p => p.key === 'junit')) {
       jobs['test:unit'].artifacts = {
@@ -161,7 +171,7 @@ const generateJobs = (scanResult: ScanResult, stages: string[]): Record<string, 
   
   // Quality stage
   if (stages.includes('quality') && scanResult.pluginHits.find(p => p.key === 'sonarqube')) {
-    jobs['quality:sonar'] = {
+    jobs['quality:sonar'] = addTimeout({
       stage: 'quality',
       script: [
         'echo "Running SonarQube analysis..."',
@@ -169,12 +179,12 @@ const generateJobs = (scanResult: ScanResult, stages: string[]): Record<string, 
           'mvn sonar:sonar -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN' :
           'sonar-scanner -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN'
       ]
-    }
+    })
   }
   
   // Package stage (Docker)
   if (stages.includes('package') && scanResult.pluginHits.find(p => p.key === 'docker')) {
-    jobs['package:docker'] = {
+    jobs['package:docker'] = addTimeout({
       stage: 'package',
       script: [
         'docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .',
@@ -182,12 +192,12 @@ const generateJobs = (scanResult: ScanResult, stages: string[]): Record<string, 
         'docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE:latest',
         'docker push $CI_REGISTRY_IMAGE:latest'
       ]
-    }
+    })
   }
   
   // Deploy stage
   if (stages.includes('deploy')) {
-    jobs['deploy:staging'] = {
+    jobs['deploy:staging'] = addTimeout({
       stage: 'deploy',
       script: [
         'echo "Deploying to staging..."',
@@ -198,21 +208,21 @@ const generateJobs = (scanResult: ScanResult, stages: string[]): Record<string, 
           'echo "Add your deployment commands here"'
       ],
       only: ['develop', 'main']
-    }
+    })
   }
   
   // Add parallel execution if detected
   if (scanResult.pluginHits.find(p => p.key === 'parallel')) {
-    jobs['test:integration'] = {
+    jobs['test:integration'] = addTimeout({
       stage: 'test',
       script: ['echo "Running integration tests..."'],
       needs: ['build:app']
-    }
-    jobs['test:security'] = {
+    })
+    jobs['test:security'] = addTimeout({
       stage: 'test', 
       script: ['echo "Running security tests..."'],
       needs: ['build:app']
-    }
+    })
   }
   
   return jobs
@@ -299,7 +309,7 @@ export function convertToGitLabCI(scanResult: ScanResult, jenkinsContent: string
   }
   
   // Generate jobs
-  const jobs = generateJobs(scanResult, stages)
+  const jobs = generateJobs(scanResult, stages, features)
   
   // Combine everything
   const fullPipeline = {
@@ -321,8 +331,15 @@ function generateYAML(pipeline: GitLabPipeline, scanResult: ScanResult, jenkinsC
 `
 
   // Add warnings as comments
-  if (scanResult.warnings.length > 0) {
+  if (scanResult.warnings.length > 0 || scanResult.scripted) {
     yaml += '# ⚠️  Migration Warnings:\n'
+    
+    // Add scripted pipeline specific warnings
+    if (scanResult.scripted) {
+      yaml += '#   - Scripted Jenkins pipeline may need manual adjustment\n'
+      yaml += '#   - Complex Groovy logic requires review\n'
+    }
+    
     scanResult.warnings.forEach(warning => {
       yaml += `#   - ${warning}\n`
     })
@@ -441,6 +458,7 @@ function generateYAML(pipeline: GitLabPipeline, scanResult: ScanResult, jenkinsC
       if (gitlabJob.extends) yaml += `  extends: ${gitlabJob.extends}\n`
       if (gitlabJob.stage) yaml += `  stage: ${gitlabJob.stage}\n`
       if (gitlabJob.image) yaml += `  image: ${gitlabJob.image}\n`
+      if ((gitlabJob as any).timeout) yaml += `  timeout: ${(gitlabJob as any).timeout}\n`
       if (gitlabJob.services) {
         yaml += '  services:\n'
         gitlabJob.services.forEach(service => {

@@ -17,6 +17,12 @@ interface GitLabJob {
   dependencies?: string[]
   needs?: string[]
   parallel?: any
+  coverage?: string
+  before_script?: string[]
+  after_script?: string[]
+  environment?: any
+  rules?: any[]
+  variables?: Record<string, any>
 }
 
 interface GitLabPipeline {
@@ -53,9 +59,15 @@ function convertParametersToVariables(params: JenkinsParameter[]): Record<string
 const PLUGIN_MAPPINGS: Record<string, (pipeline: GitLabPipeline) => void> = {
   maven: (pipeline) => {
     pipeline.default = pipeline.default || {}
-    pipeline.default.image = 'maven:3.8-openjdk-11'
-    pipeline.variables = { ...pipeline.variables, MAVEN_OPTS: '-Dmaven.repo.local=.m2/repository' }
+    // Use Java 17 compatible Maven image
+    pipeline.default.image = 'maven:3.9-eclipse-temurin-17'
+    pipeline.variables = { 
+      ...pipeline.variables, 
+      MAVEN_OPTS: '-Dmaven.repo.local=.m2/repository',
+      MAVEN_CLI_OPTS: '--batch-mode --errors --fail-at-end --show-version'
+    }
     pipeline.default.cache = {
+      key: '${CI_COMMIT_REF_SLUG}',
       paths: ['.m2/repository/']
     }
   },
@@ -70,10 +82,16 @@ const PLUGIN_MAPPINGS: Record<string, (pipeline: GitLabPipeline) => void> = {
     pipeline.default = pipeline.default || {}
     // Only set Docker image if no build tool image has been set
     if (!pipeline.default.image || pipeline.default.image === 'docker:latest') {
-      pipeline.default.image = 'docker:latest'
+      pipeline.default.image = 'docker:24'
       pipeline.default.services = ['docker:dind']
     }
-    pipeline.variables = { ...pipeline.variables, DOCKER_DRIVER: 'overlay2' }
+    pipeline.variables = { 
+      ...pipeline.variables, 
+      DOCKER_DRIVER: 'overlay2',
+      DOCKER_TLS_CERTDIR: '/certs',
+      DOCKER_HOST: 'tcp://docker:2376',
+      DOCKER_TLS_VERIFY: '1'
+    }
   },
   nodejs: (pipeline) => {
     pipeline.default = pipeline.default || {}
@@ -86,21 +104,22 @@ const PLUGIN_MAPPINGS: Record<string, (pipeline: GitLabPipeline) => void> = {
     pipeline.variables = { 
       ...pipeline.variables, 
       SONAR_HOST_URL: '${SONAR_HOST_URL}',
-      SONAR_TOKEN: '${SONAR_TOKEN}'
+      SONAR_TOKEN: '${SONAR_TOKEN}',
+      SONAR_USER_HOME: '${CI_PROJECT_DIR}/.sonar'
     }
   }
 }
 
 // Convert complexity tier to appropriate GitLab structure
 const getStagesForComplexity = (tier: string, isScripted: boolean, pluginHits: Array<{key: string}>): string[] => {
-  let stages: string[] = []
+  let stages: string[] = ['prepare']  // Always start with prepare stage
   
   if (tier === 'simple') {
-    stages = ['build', 'test']
+    stages.push('build', 'test')
   } else if (tier === 'medium') {
-    stages = ['build', 'test', 'quality']
+    stages.push('build', 'test', 'quality')
   } else {
-    stages = ['prepare', 'build', 'test', 'quality']
+    stages.push('build', 'test', 'quality')
   }
   
   // Add package stage if Docker is detected
@@ -140,11 +159,25 @@ const generateJobs = (scanResult: ScanResult, stages: string[], features?: any):
     stage: 'build',
     script: [
       'echo "Building application..."',
-      scanResult.pluginHits.find(p => p.key === 'maven') ? 'mvn clean compile' :
-      scanResult.pluginHits.find(p => p.key === 'gradle') ? 'gradle build' :
-      scanResult.pluginHits.find(p => p.key === 'npm') ? 'npm install && npm run build' :
+      scanResult.pluginHits.find(p => p.key === 'maven') ? 'mvn clean compile package -DskipTests' :
+      scanResult.pluginHits.find(p => p.key === 'gradle') ? 'gradle build -x test' :
+      scanResult.pluginHits.find(p => p.key === 'npm') ? 'npm ci && npm run build' :
       'echo "Add your build commands here"'
-    ]
+    ],
+    artifacts: {
+      paths: scanResult.pluginHits.find(p => p.key === 'maven') ? ['target/*.jar', 'target/*.war'] :
+             scanResult.pluginHits.find(p => p.key === 'gradle') ? ['build/libs/*.jar'] :
+             scanResult.pluginHits.find(p => p.key === 'npm') ? ['dist/', 'build/'] :
+             ['build/'],
+      expire_in: '1 hour'
+    },
+    cache: {
+      key: '${CI_COMMIT_REF_SLUG}',
+      paths: scanResult.pluginHits.find(p => p.key === 'maven') ? ['.m2/repository'] :
+             scanResult.pluginHits.find(p => p.key === 'gradle') ? ['.gradle', 'build/tmp'] :
+             scanResult.pluginHits.find(p => p.key === 'npm') ? ['node_modules/', '.npm'] :
+             []
+    }
   })
   
   // Test stage
@@ -152,21 +185,31 @@ const generateJobs = (scanResult: ScanResult, stages: string[], features?: any):
     jobs['test:unit'] = addTimeout({
       stage: 'test',
       script: [
-        'echo "Running tests..."',
+        'echo "Running unit tests..."',
         scanResult.pluginHits.find(p => p.key === 'maven') ? 'mvn test' :
         scanResult.pluginHits.find(p => p.key === 'gradle') ? 'gradle test' :
-        scanResult.pluginHits.find(p => p.key === 'npm') ? 'npm test' :
+        scanResult.pluginHits.find(p => p.key === 'npm') ? 'npm test -- --coverage' :
         'echo "Add your test commands here"'
-      ]
-    })
-    
-    if (scanResult.pluginHits.find(p => p.key === 'junit')) {
-      jobs['test:unit'].artifacts = {
+      ],
+      dependencies: ['build:app'],
+      coverage: '/Coverage: \\d+\\.\\d+%/',
+      artifacts: {
+        when: 'always',
         reports: {
-          junit: ['**/target/surefire-reports/TEST-*.xml', '**/build/test-results/test/TEST-*.xml']
-        }
+          junit: scanResult.pluginHits.find(p => p.key === 'maven') ? ['target/surefire-reports/TEST-*.xml'] :
+                 scanResult.pluginHits.find(p => p.key === 'gradle') ? ['build/test-results/test/TEST-*.xml'] :
+                 ['coverage/junit.xml'],
+          coverage_report: {
+            coverage_format: 'cobertura',
+            path: scanResult.pluginHits.find(p => p.key === 'maven') ? 'target/site/cobertura/coverage.xml' :
+                  scanResult.pluginHits.find(p => p.key === 'gradle') ? 'build/reports/jacoco/test/jacocoTestReport.xml' :
+                  'coverage/cobertura-coverage.xml'
+          }
+        },
+        paths: ['coverage/'],
+        expire_in: '30 days'
       }
-    }
+    })
   }
   
   // Quality stage
@@ -178,7 +221,17 @@ const generateJobs = (scanResult: ScanResult, stages: string[], features?: any):
         scanResult.pluginHits.find(p => p.key === 'maven') ? 
           'mvn sonar:sonar -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN' :
           'sonar-scanner -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_TOKEN'
-      ]
+      ],
+      needs: ['build:app'],
+      cache: {
+        key: 'sonar-${CI_COMMIT_REF_SLUG}',
+        paths: ['.sonar/cache']
+      },
+      artifacts: {
+        reports: {
+          junit: ['target/surefire-reports/TEST-*.xml']
+        }
+      }
     })
   }
   
@@ -186,12 +239,25 @@ const generateJobs = (scanResult: ScanResult, stages: string[], features?: any):
   if (stages.includes('package') && scanResult.pluginHits.find(p => p.key === 'docker')) {
     jobs['package:docker'] = addTimeout({
       stage: 'package',
+      image: 'docker:24',
+      services: ['docker:dind'],
+      variables: {
+        DOCKER_HOST: 'tcp://docker:2375',
+        DOCKER_TLS_CERTDIR: ''
+      },
+      before_script: [
+        'echo "Logging into GitLab Container Registry..."',
+        'docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"'
+      ],
       script: [
-        'docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .',
-        'docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA',
-        'docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE:latest',
-        'docker push $CI_REGISTRY_IMAGE:latest'
-      ]
+        'echo "Building Docker image..."',
+        'docker build -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA" .',
+        'docker build -t "$CI_REGISTRY_IMAGE:latest" .',
+        'echo "Pushing Docker images..."',
+        'docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA"',
+        'docker push "$CI_REGISTRY_IMAGE:latest"'
+      ],
+      needs: ['build:app']
     })
   }
   
@@ -200,28 +266,74 @@ const generateJobs = (scanResult: ScanResult, stages: string[], features?: any):
     jobs['deploy:staging'] = addTimeout({
       stage: 'deploy',
       script: [
-        'echo "Deploying to staging..."',
+        'echo "Deploying to staging environment..."',
         scanResult.pluginHits.find(p => p.key === 'kubernetes') ? 
           'kubectl apply -f k8s/staging/' :
         scanResult.pluginHits.find(p => p.key === 'helm') ?
-          'helm upgrade --install app-staging ./chart' :
+          'helm upgrade --install app-staging ./chart --set image.tag=$CI_COMMIT_SHA' :
+        scanResult.pluginHits.find(p => p.key === 'docker') ?
+          'docker run -d --name staging-app -p 8080:8080 $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA' :
           'echo "Add your deployment commands here"'
       ],
-      only: ['develop', 'main']
+      environment: {
+        name: 'staging',
+        url: 'https://staging.example.com'
+      },
+      dependencies: ['package:docker'],
+      rules: [
+        {
+          if: '$CI_COMMIT_BRANCH == "main"',
+          when: 'manual'
+        },
+        {
+          if: '$CI_COMMIT_BRANCH == "develop"'
+        }
+      ],
+      after_script: [
+        'echo "Deployment completed"',
+        'echo "Cleaning up temporary files..."'
+      ]
     })
   }
   
+  // Add lint job if we have supported languages
+  if (stages.includes('prepare') || stages.length > 2) {
+    jobs['lint:yaml'] = {
+      stage: 'prepare',
+      image: 'alpine:latest',
+      before_script: ['apk add --no-cache yamllint'],
+      script: [
+        'echo "Linting YAML files..."',
+        'find . -name "*.yml" -o -name "*.yaml" | xargs yamllint -d relaxed || true'
+      ],
+      allow_failure: true
+    }
+  }
+
+  // Add cleanup job
+  jobs['cleanup:cache'] = {
+    stage: 'cleanup',
+    image: 'alpine:latest',
+    script: [
+      'echo "Cleaning up build cache and temporary files..."',
+      'rm -rf .m2/repository || true',
+      'docker system prune -f || true'
+    ],
+    when: 'always',
+    allow_failure: true
+  }
+
   // Add parallel execution if detected
   if (scanResult.pluginHits.find(p => p.key === 'parallel')) {
     jobs['test:integration'] = addTimeout({
       stage: 'test',
       script: ['echo "Running integration tests..."'],
-      needs: ['build:app']
+      dependencies: ['build:app']
     })
     jobs['test:security'] = addTimeout({
       stage: 'test', 
       script: ['echo "Running security tests..."'],
-      needs: ['build:app']
+      dependencies: ['build:app']
     })
   }
   
@@ -327,6 +439,33 @@ function generateYAML(pipeline: GitLabPipeline, scanResult: ScanResult, jenkinsC
 # Auto-generated from Jenkins pipeline (${scanResult.declarative ? 'Declarative' : scanResult.scripted ? 'Scripted' : 'Unknown'})
 # Complexity: ${scanResult.tier.toUpperCase()} | Lines: ${scanResult.lineCount} | Plugins: ${scanResult.pluginCount}
 # Generated on: ${new Date().toISOString()}
+
+# Include GitLab CI templates for enhanced functionality
+include:`
+
+  // Add includes based on detected plugins
+  const hasDocker = scanResult.pluginHits.find(p => p.key === 'docker')
+  const hasSonar = scanResult.pluginHits.find(p => p.key === 'sonarqube')
+  
+  if (hasDocker) {
+    yaml += `
+  - remote: "https://gitlab.com/gitlab-org/gitlab/-/raw/master/lib/gitlab/ci/templates/Docker.gitlab-ci.yml"`
+  }
+  
+  if (hasSonar) {
+    yaml += `
+  - remote: "https://gitlab.com/gitlab-org/gitlab/-/raw/master/lib/gitlab/ci/templates/Security/SAST.gitlab-ci.yml"`
+  }
+  
+  // Always include basic security scanning
+  yaml += `
+  - template: Security/Secret-Detection.gitlab-ci.yml
+
+# ⚙️  Required CI/CD Variables (add these in GitLab project settings):
+# CI_REGISTRY_USER      - GitLab Container Registry username (usually $CI_REGISTRY_USER)
+# CI_REGISTRY_PASSWORD  - GitLab Container Registry password (usually $CI_REGISTRY_PASSWORD)${hasSonar ? `
+# SONAR_HOST_URL        - SonarQube server URL (e.g., https://sonarcloud.io)
+# SONAR_TOKEN           - SonarQube authentication token (masked, protected)` : ''}
 
 `
 

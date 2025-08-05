@@ -2,25 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Dark theme root variables and global styles */
+/* Light theme root variables and global styles */
 :root {
-  --bg-primary: #0a0a0a;
-  --bg-secondary: #111111;
-  --bg-tertiary: #1a1a1a;
-  --bg-card: #1e1e1e;
-  --bg-overlay: rgba(0, 0, 0, 0.8);
-  --border-primary: #2a2a2a;
-  --border-secondary: #333333;
-  --text-primary: #ffffff;
-  --text-secondary: #a3a3a3;
-  --text-muted: #6b7280;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --bg-card: #ffffff;
+  --bg-overlay: rgba(0, 0, 0, 0.5);
+  --border-primary: #e2e8f0;
+  --border-secondary: #cbd5e1;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
   --accent-primary: #3b82f6;
   --accent-secondary: #1d4ed8;
   --accent-success: #10b981;
   --accent-warning: #f59e0b;
   --accent-error: #ef4444;
-  --glass-bg: rgba(255, 255, 255, 0.05);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(226, 232, 240, 0.5);
 }
 
 * {
@@ -36,7 +36,7 @@ html, body {
   scroll-behavior: smooth;
 }
 
-/* Dark scrollbar styling */
+/* Light scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -52,7 +52,7 @@ html, body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #4a4a4a;
+  background: #94a3b8;
 }
 
 /* Custom glass card styling */
@@ -63,7 +63,7 @@ html, body {
   border-radius: 16px;
 }
 
-/* Enhanced blob for dark theme */
+/* Enhanced blob for light theme */
 .blob {
   @apply absolute h-96 w-96 rounded-full opacity-20 blur-3xl animate-blob;
 }
@@ -120,7 +120,7 @@ html, body {
 }
 .animate-glow { animation: glow 2s ease-in-out infinite; }
 
-/* Dark theme button styles */
+/* Light theme button styles */
 .btn-primary {
   @apply bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 
          text-white font-medium px-6 py-3 rounded-lg transition-all duration-200
@@ -128,14 +128,14 @@ html, body {
 }
 
 .btn-secondary {
-  @apply bg-gray-800 hover:bg-gray-700 text-gray-100 font-medium px-6 py-3 
-         rounded-lg transition-all duration-200 border border-gray-700 hover:border-gray-600;
+  @apply bg-white hover:bg-gray-50 text-gray-700 font-medium px-6 py-3 
+         rounded-lg transition-all duration-200 border border-gray-300 hover:border-gray-400 shadow-sm;
 }
 
-/* Dark code block styling */
+/* Light code block styling */
 pre {
-  @apply bg-gray-900 border border-gray-800 rounded-lg p-4 overflow-x-auto;
-  color: #e5e7eb;
+  @apply bg-gray-50 border border-gray-200 rounded-lg p-4 overflow-x-auto;
+  color: #374151;
 }
 
 pre code {
@@ -146,74 +146,74 @@ pre code {
   background: transparent;
 }
 
-/* Dark scrollbar for code blocks */
+/* Light scrollbar for code blocks */
 pre::-webkit-scrollbar {
   height: 6px;
 }
 
 pre::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.05);
   border-radius: 3px;
 }
 
 pre::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.2);
   border-radius: 3px;
 }
 
 pre::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.3);
 }
 
-/* Dark form controls */
+/* Light form controls */
 input, textarea, select {
-  @apply bg-gray-900 border-gray-700 text-gray-100 
+  @apply bg-white border-gray-300 text-gray-900 
          focus:border-blue-500 focus:ring-blue-500/20;
 }
 
-/* Modal and overlay dark styling */
+/* Modal and overlay light styling */
 .modal-backdrop {
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
 }
 
-/* Enhanced dropzone for dark theme */
+/* Enhanced dropzone for light theme */
 .dropzone-active {
   @apply border-blue-500 bg-blue-500/10;
 }
 
 .dropzone-idle {
-  @apply border-gray-600 hover:border-gray-500 bg-gray-900/50;
+  @apply border-gray-300 hover:border-gray-400 bg-white/50;
 }
 
-/* Progress bar dark styling */
+/* Progress bar light styling */
 .progress-bar {
-  @apply bg-gray-800 rounded-full overflow-hidden;
+  @apply bg-gray-200 rounded-full overflow-hidden;
 }
 
 .progress-fill {
   @apply bg-gradient-to-r from-blue-500 to-blue-600 h-full transition-all duration-300;
 }
 
-/* Card hover effects for dark theme */
+/* Card hover effects for light theme */
 .card-hover {
   @apply transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/10 
-         hover:-translate-y-1 hover:border-gray-600;
+         hover:-translate-y-1 hover:border-gray-300;
 }
 
-/* Status indicators for dark theme */
+/* Status indicators for light theme */
 .status-success {
-  @apply bg-green-500/20 text-green-400 border-green-500/30;
+  @apply bg-green-100 text-green-700 border-green-300;
 }
 
 .status-warning {
-  @apply bg-yellow-500/20 text-yellow-400 border-yellow-500/30;
+  @apply bg-yellow-100 text-yellow-700 border-yellow-300;
 }
 
 .status-error {
-  @apply bg-red-500/20 text-red-400 border-red-500/30;
+  @apply bg-red-100 text-red-700 border-red-300;
 }
 
 .status-info {
-  @apply bg-blue-500/20 text-blue-400 border-blue-500/30;
+  @apply bg-blue-100 text-blue-700 border-blue-300;
 }

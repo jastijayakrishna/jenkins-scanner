@@ -216,10 +216,11 @@ describe('GitLab Lint', () => {
 
       const categorized = categorizeErrors(errors)
 
-      expect(categorized.configuration).toHaveLength(1) // Only first contains "job"
+      expect(categorized.configuration).toHaveLength(2) // Both contain "job" or "stage"
       expect(categorized.configuration[0]).toContain('jobs:build config')
+      expect(categorized.configuration[1]).toContain('stage "invalid-stage"')
       expect(categorized.syntax).toHaveLength(0)
-      expect(categorized.other).toHaveLength(1) // Second goes to "other"
+      expect(categorized.other).toHaveLength(0) // Both are configuration errors
     })
 
     it('should handle mixed error types', () => {

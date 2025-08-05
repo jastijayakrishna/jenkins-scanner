@@ -71,21 +71,21 @@ export default function GitLabConverter({ result, onClose }: GitLabConverterProp
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-fade-in">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-slate-700">
+        <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+              <h2 className="text-2xl font-bold text-gray-900">
                 GitLab CI/CD Configuration
               </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              <p className="text-sm text-gray-500 mt-1">
                 Auto-generated from your Jenkins pipeline
               </p>
             </div>
             <button
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              className="text-gray-500 hover:text-gray-700"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -99,9 +99,9 @@ export default function GitLabConverter({ result, onClose }: GitLabConverterProp
           {/* GitLab CI Lint Status */}
           <div className="mb-4">
             {isLinting && (
-              <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                <Loader2 className="w-5 h-5 text-blue-600 dark:text-blue-400 animate-spin" />
-                <span className="text-sm text-blue-800 dark:text-blue-200">
+              <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
+                <span className="text-sm text-blue-800">
                   Validating with GitLab CI Lint...
                 </span>
               </div>
@@ -110,24 +110,24 @@ export default function GitLabConverter({ result, onClose }: GitLabConverterProp
             {lintResult && !isLinting && (
               <div className={`flex items-start gap-3 p-3 rounded-lg ${
                 lintResult.status === 'valid' 
-                  ? 'bg-green-50 dark:bg-green-900/20' 
-                  : 'bg-red-50 dark:bg-red-900/20'
+                  ? 'bg-green-50' 
+                  : 'bg-red-50'
               }`}>
                 {lintResult.status === 'valid' ? (
-                  <ShieldCheck className="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5" />
+                  <ShieldCheck className="w-5 h-5 text-green-600 mt-0.5" />
                 ) : (
-                  <Shield className="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5" />
+                  <Shield className="w-5 h-5 text-red-600 mt-0.5" />
                 )}
                 <div className="flex-1">
                   <div className={`text-sm font-medium ${
                     lintResult.status === 'valid'
-                      ? 'text-green-800 dark:text-green-200'
-                      : 'text-red-800 dark:text-red-200'
+                      ? 'text-green-800'
+                      : 'text-red-800'
                   }`}>
                     {lintResult.status === 'valid' ? 'GitLab CI Lint passed 🎉' : 'GitLab CI Lint errors'}
                   </div>
                   {lintResult.status === 'invalid' && lintResult.errors.length > 0 && (
-                    <ul className="mt-2 text-sm text-red-700 dark:text-red-300 list-disc list-inside space-y-1">
+                    <ul className="mt-2 text-sm text-red-700 list-disc list-inside space-y-1">
                       {lintResult.errors.map((error, idx) => (
                         <li key={idx} className="break-words">{error}</li>
                       ))}
@@ -135,10 +135,10 @@ export default function GitLabConverter({ result, onClose }: GitLabConverterProp
                   )}
                   {lintResult.warnings && lintResult.warnings.length > 0 && (
                     <div className="mt-2">
-                      <div className="text-xs font-medium text-yellow-800 dark:text-yellow-200 mb-1">
+                      <div className="text-xs font-medium text-yellow-800 mb-1">
                         Warnings:
                       </div>
-                      <ul className="text-sm text-yellow-700 dark:text-yellow-300 list-disc list-inside space-y-1">
+                      <ul className="text-sm text-yellow-700 list-disc list-inside space-y-1">
                         {lintResult.warnings.map((warning, idx) => (
                           <li key={idx} className="break-words">{warning}</li>
                         ))}
@@ -148,8 +148,8 @@ export default function GitLabConverter({ result, onClose }: GitLabConverterProp
                 </div>
                 <button
                   onClick={performLint}
-                  className="text-xs px-2 py-1 rounded bg-gray-200 dark:bg-gray-700 
-                           hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                  className="text-xs px-2 py-1 rounded bg-gray-200 
+                           hover:bg-gray-300 transition-colors"
                   title="Re-validate"
                 >
                   Re-check
@@ -158,20 +158,20 @@ export default function GitLabConverter({ result, onClose }: GitLabConverterProp
             )}
 
             {lintError && !isLinting && (
-              <div className="flex items-start gap-3 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-                <AlertCircle className="w-5 h-5 text-orange-600 dark:text-orange-400 mt-0.5" />
+              <div className="flex items-start gap-3 p-3 bg-orange-50 rounded-lg">
+                <AlertCircle className="w-5 h-5 text-orange-600 mt-0.5" />
                 <div className="flex-1">
-                  <div className="text-sm font-medium text-orange-800 dark:text-orange-200">
+                  <div className="text-sm font-medium text-orange-800">
                     Unable to validate with GitLab CI Lint
                   </div>
-                  <div className="mt-1 text-sm text-orange-700 dark:text-orange-300">
+                  <div className="mt-1 text-sm text-orange-700">
                     {lintError}
                   </div>
                 </div>
                 <button
                   onClick={performLint}
-                  className="text-xs px-2 py-1 rounded bg-orange-200 dark:bg-orange-700 
-                           hover:bg-orange-300 dark:hover:bg-orange-600 transition-colors"
+                  className="text-xs px-2 py-1 rounded bg-orange-200 
+                           hover:bg-orange-300 transition-colors"
                   title="Retry validation"
                 >
                   Retry
@@ -182,14 +182,14 @@ export default function GitLabConverter({ result, onClose }: GitLabConverterProp
 
           {/* Validation Status */}
           {result.validationErrors.length > 0 && (
-            <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+            <div className="mb-4 p-4 bg-yellow-50 rounded-lg">
               <div className="flex items-start">
-                <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
+                <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5" />
                 <div className="ml-3">
-                  <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                  <h3 className="text-sm font-medium text-yellow-800">
                     Validation Warnings
                   </h3>
-                  <ul className="mt-2 text-sm text-yellow-700 dark:text-yellow-300 list-disc list-inside">
+                  <ul className="mt-2 text-sm text-yellow-700 list-disc list-inside">
                     {result.validationErrors.map((error, idx) => (
                       <li key={idx}>{error}</li>
                     ))}
@@ -201,21 +201,21 @@ export default function GitLabConverter({ result, onClose }: GitLabConverterProp
 
           {/* Migration Summary */}
           <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-brand-50 dark:bg-brand-900/20 rounded-lg p-4">
-              <div className="text-sm text-brand-600 dark:text-brand-400">Complexity</div>
-              <div className="text-xl font-semibold text-brand-700 dark:text-brand-300">
+            <div className="bg-brand-50 rounded-lg p-4">
+              <div className="text-sm text-brand-600">Complexity</div>
+              <div className="text-xl font-semibold text-brand-700">
                 {result.scanResult.tier.toUpperCase()}
               </div>
             </div>
-            <div className="bg-brand-50 dark:bg-brand-900/20 rounded-lg p-4">
-              <div className="text-sm text-brand-600 dark:text-brand-400">Pipeline Type</div>
-              <div className="text-xl font-semibold text-brand-700 dark:text-brand-300">
+            <div className="bg-brand-50 rounded-lg p-4">
+              <div className="text-sm text-brand-600">Pipeline Type</div>
+              <div className="text-xl font-semibold text-brand-700">
                 {result.scanResult.declarative ? 'Declarative' : result.scanResult.scripted ? 'Scripted' : 'Unknown'}
               </div>
             </div>
-            <div className="bg-brand-50 dark:bg-brand-900/20 rounded-lg p-4">
-              <div className="text-sm text-brand-600 dark:text-brand-400">Plugins Mapped</div>
-              <div className="text-xl font-semibold text-brand-700 dark:text-brand-300">
+            <div className="bg-brand-50 rounded-lg p-4">
+              <div className="text-sm text-brand-600">Plugins Mapped</div>
+              <div className="text-xl font-semibold text-brand-700">
                 {result.scanResult.pluginCount}
               </div>
             </div>
@@ -242,8 +242,8 @@ export default function GitLabConverter({ result, onClose }: GitLabConverterProp
                 )}
               </button>
             </div>
-            <pre className="bg-gray-50 dark:bg-slate-900 rounded-lg p-4 overflow-x-auto">
-              <code className="text-sm text-gray-800 dark:text-gray-200 font-mono">
+            <pre className="bg-gray-50 rounded-lg p-4 overflow-x-auto">
+              <code className="text-sm text-gray-800 font-mono">
                 {result.yaml}
               </code>
             </pre>
@@ -251,9 +251,9 @@ export default function GitLabConverter({ result, onClose }: GitLabConverterProp
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900">
+        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
           <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="text-sm text-gray-500">
               {lintResult?.status === 'valid' ? (
                 <>
                   <CheckCircle className="w-4 h-4 inline mr-1 text-green-500" />
@@ -279,8 +279,8 @@ export default function GitLabConverter({ result, onClose }: GitLabConverterProp
             <div className="flex gap-3">
               <button
                 onClick={onClose}
-                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-200 
-                         dark:hover:bg-slate-700 rounded-lg transition-colors"
+                className="px-4 py-2 text-gray-700 hover:bg-gray-200 
+                         rounded-lg transition-colors"
               >
                 Close
               </button>

@@ -1,0 +1,324 @@
+{
+  "slack": {
+    "status": "native",
+    "gitlab": "notifications:slack",
+    "note": "Use GitLab Slack notifications",
+    "documentation": "https://docs.gitlab.com/ee/user/project/integrations/slack.html"
+  },
+  "docker-workflow": {
+    "status": "template",
+    "include": "https://gitlab.com/gitlab-org/gitlab/-/raw/master/lib/gitlab/ci/templates/Docker.gitlab-ci.yml",
+    "note": "Use GitLab Docker template"
+  },
+  "blueocean": {
+    "status": "unsupported",
+    "note": "UI only - use GitLab CI/CD UI instead",
+    "alternative": "GitLab CI/CD pipeline editor"
+  },
+  "pipeline-stage-view": {
+    "status": "unsupported",
+    "note": "UI only - GitLab has built-in pipeline visualization",
+    "alternative": "GitLab pipeline graphs"
+  },
+  "build-timeout": {
+    "status": "native",
+    "gitlab": "timeout",
+    "note": "Use job-level timeout attribute"
+  },
+  "timestamper": {
+    "status": "native",
+    "gitlab": "variables:FF_TIMESTAMPS",
+    "note": "Set FF_TIMESTAMPS: 'true' in variables"
+  },
+  "ws-cleanup": {
+    "status": "native",
+    "gitlab": "after_script",
+    "note": "Use after_script for cleanup commands"
+  },
+  "ansicolor": {
+    "status": "native",
+    "gitlab": "variables:TERM",
+    "note": "GitLab CI supports ANSI colors by default"
+  },
+  "credentials-binding": {
+    "status": "native",
+    "gitlab": "variables",
+    "note": "Use GitLab CI/CD variables with masking"
+  },
+  "git": {
+    "status": "native",
+    "gitlab": "variables:GIT_STRATEGY",
+    "note": "Built-in Git support with GIT_STRATEGY"
+  },
+  "pipeline-graph-analysis": {
+    "status": "unsupported",
+    "note": "GitLab has built-in dependency analysis",
+    "alternative": "GitLab dependency scanning"
+  },
+  "junit": {
+    "status": "native",
+    "gitlab": "artifacts:reports:junit",
+    "note": "Use artifacts.reports.junit for test results"
+  },
+  "jacoco": {
+    "status": "native",
+    "gitlab": "artifacts:reports:coverage_report",
+    "note": "Use artifacts.reports.coverage_report"
+  },
+  "sonarqube": {
+    "status": "template",
+    "include": "https://gitlab.com/gitlab-org/gitlab/-/raw/master/lib/gitlab/ci/templates/Security/SAST.gitlab-ci.yml",
+    "note": "Use GitLab SAST template or SonarQube integration"
+  },
+  "checkmarx": {
+    "status": "template",
+    "include": "https://gitlab.com/gitlab-org/gitlab/-/raw/master/lib/gitlab/ci/templates/Security/SAST.gitlab-ci.yml",
+    "note": "Use GitLab SAST template"
+  },
+  "dependency-check": {
+    "status": "template",
+    "include": "https://gitlab.com/gitlab-org/gitlab/-/raw/master/lib/gitlab/ci/templates/Security/Dependency-Scanning.gitlab-ci.yml",
+    "note": "Use GitLab Dependency Scanning template"
+  },
+  "owasp-dependency-check": {
+    "status": "template",
+    "include": "https://gitlab.com/gitlab-org/gitlab/-/raw/master/lib/gitlab/ci/templates/Security/Dependency-Scanning.gitlab-ci.yml",
+    "note": "Use GitLab Dependency Scanning template"
+  },
+  "docker-build-step": {
+    "status": "template",
+    "include": "https://gitlab.com/gitlab-org/gitlab/-/raw/master/lib/gitlab/ci/templates/Docker.gitlab-ci.yml",
+    "note": "Use GitLab Docker template"
+  },
+  "kubernetes-cd": {
+    "status": "template",
+    "include": "https://gitlab.com/gitlab-org/gitlab/-/raw/master/lib/gitlab/ci/templates/Auto-DevOps.gitlab-ci.yml",
+    "note": "Use GitLab Auto DevOps or Kubernetes template"
+  },
+  "helm": {
+    "status": "template",
+    "include": "https://gitlab.com/gitlab-org/gitlab/-/raw/master/lib/gitlab/ci/templates/Auto-DevOps.gitlab-ci.yml",
+    "note": "Use GitLab Auto DevOps with Helm"
+  },
+  "terraform": {
+    "status": "template",
+    "include": "https://gitlab.com/gitlab-org/gitlab/-/raw/master/lib/gitlab/ci/templates/Terraform.gitlab-ci.yml",
+    "note": "Use GitLab Terraform template"
+  },
+  "ansible": {
+    "status": "native",
+    "gitlab": "image:ansible",
+    "note": "Use Ansible Docker image in job"
+  },
+  "ssh-agent": {
+    "status": "native",
+    "gitlab": "before_script",
+    "note": "Use before_script with ssh-agent setup"
+  },
+  "nodejs": {
+    "status": "native",
+    "gitlab": "image:node",
+    "note": "Use Node.js Docker image"
+  },
+  "maven-invoker": {
+    "status": "native",
+    "gitlab": "image:maven",
+    "note": "Use Maven Docker image"
+  },
+  "gradle": {
+    "status": "native",
+    "gitlab": "image:gradle",
+    "note": "Use Gradle Docker image"
+  },
+  "python": {
+    "status": "native",
+    "gitlab": "image:python",
+    "note": "Use Python Docker image"
+  },
+  "go": {
+    "status": "native",
+    "gitlab": "image:golang",
+    "note": "Use Go Docker image"
+  },
+  "ruby": {
+    "status": "native",
+    "gitlab": "image:ruby",
+    "note": "Use Ruby Docker image"
+  },
+  "dotnet": {
+    "status": "native",
+    "gitlab": "image:mcr.microsoft.com/dotnet/sdk",
+    "note": "Use .NET SDK Docker image"
+  },
+  "xcode": {
+    "status": "limited",
+    "note": "Requires macOS runners - use GitLab.com SaaS macOS runners",
+    "alternative": "GitLab SaaS macOS runners"
+  },
+  "android-emulator": {
+    "status": "native",
+    "gitlab": "image:androidsdk/android",
+    "note": "Use Android SDK Docker image"
+  },
+  "performance": {
+    "status": "template",
+    "include": "https://gitlab.com/gitlab-org/gitlab/-/raw/master/lib/gitlab/ci/templates/Jobs/Browser-Performance-Testing.gitlab-ci.yml",
+    "note": "Use GitLab Browser Performance template"
+  },
+  "gatling": {
+    "status": "native",
+    "gitlab": "image:denvazh/gatling",
+    "note": "Use Gatling Docker image"
+  },
+  "jmeter": {
+    "status": "native",
+    "gitlab": "image:justb4/jmeter",
+    "note": "Use JMeter Docker image"
+  },
+  "selenium": {
+    "status": "native",
+    "gitlab": "services:selenium/standalone",
+    "note": "Use Selenium service containers"
+  },
+  "cypress": {
+    "status": "native",
+    "gitlab": "image:cypress/included",
+    "note": "Use Cypress Docker image"
+  },
+  "email-ext": {
+    "status": "native",
+    "gitlab": "notifications:email",
+    "note": "Use GitLab email notifications"
+  },
+  "mailer": {
+    "status": "native",
+    "gitlab": "notifications:email",
+    "note": "Use GitLab email notifications"
+  },
+  "hipchat": {
+    "status": "limited",
+    "note": "HipChat discontinued - use Slack or Teams integration",
+    "alternative": "GitLab Slack/Teams notifications"
+  },
+  "mattermost": {
+    "status": "native",
+    "gitlab": "notifications:mattermost",
+    "note": "Use GitLab Mattermost notifications"
+  },
+  "microsoft-teams": {
+    "status": "native",
+    "gitlab": "notifications:teams",
+    "note": "Use GitLab Teams notifications"
+  },
+  "artifactory": {
+    "status": "native",
+    "gitlab": "script",
+    "note": "Use curl/API calls to Artifactory in scripts"
+  },
+  "nexus-artifact-uploader": {
+    "status": "native",
+    "gitlab": "script",
+    "note": "Use curl/API calls to Nexus in scripts"
+  },
+  "s3": {
+    "status": "native",
+    "gitlab": "script",
+    "note": "Use AWS CLI in scripts for S3 operations"
+  },
+  "azure-storage": {
+    "status": "native",
+    "gitlab": "script",
+    "note": "Use Azure CLI in scripts"
+  },
+  "google-cloud-storage": {
+    "status": "native",
+    "gitlab": "script",
+    "note": "Use gcloud CLI in scripts"
+  },
+  "publish-over-ssh": {
+    "status": "native",
+    "gitlab": "script",
+    "note": "Use ssh/scp commands in scripts"
+  },
+  "publish-over-ftp": {
+    "status": "native",
+    "gitlab": "script",
+    "note": "Use ftp/lftp commands in scripts"
+  },
+  "copy-artifact": {
+    "status": "native",
+    "gitlab": "artifacts",
+    "note": "Use artifacts and dependencies keywords"
+  },
+  "archive-artifacts": {
+    "status": "native",
+    "gitlab": "artifacts:paths",
+    "note": "Use artifacts.paths to archive files"
+  },
+  "fingerprinting": {
+    "status": "native",
+    "gitlab": "artifacts:reports",
+    "note": "Use artifacts.reports for fingerprinting"
+  },
+  "parallel": {
+    "status": "native",
+    "gitlab": "parallel",
+    "note": "Use parallel keyword for matrix builds"
+  },
+  "matrix-project": {
+    "status": "native",
+    "gitlab": "parallel:matrix",
+    "note": "Use parallel.matrix for matrix builds"
+  },
+  "build-flow": {
+    "status": "native",
+    "gitlab": "needs",
+    "note": "Use needs keyword for job dependencies"
+  },
+  "delivery-pipeline": {
+    "status": "native",
+    "gitlab": "stages",
+    "note": "Use stages for pipeline flow"
+  },
+  "parameterized-trigger": {
+    "status": "native",
+    "gitlab": "trigger",
+    "note": "Use trigger keyword for downstream pipelines"
+  },
+  "build-user-vars": {
+    "status": "native",
+    "gitlab": "variables:GITLAB_USER",
+    "note": "GitLab provides user variables automatically"
+  },
+  "build-name-setter": {
+    "status": "native",
+    "gitlab": "variables:CI_PIPELINE_NAME",
+    "note": "Use variables to set pipeline names"
+  },
+  "description-setter": {
+    "status": "native",
+    "gitlab": "variables",
+    "note": "Use variables for dynamic descriptions"
+  },
+  "shared-library": {
+    "status": "limited",
+    "note": "Convert shared library to GitLab CI includes or Git submodules. Groovy logic needs manual porting.",
+    "alternative": "Use GitLab CI includes, project templates, or Git submodules",
+    "documentation": "https://docs.gitlab.com/ee/ci/yaml/includes.html"
+  },
+  "pipeline-model-definition": {
+    "status": "native",
+    "gitlab": "Declarative pipeline syntax",
+    "note": "GitLab CI YAML is declarative by default"
+  },
+  "publishhtml": {
+    "status": "native",
+    "gitlab": "artifacts:expose_as",
+    "note": "Use artifacts.expose_as for HTML reports"
+  },
+  "retry": {
+    "status": "native", 
+    "gitlab": "retry",
+    "note": "Use retry keyword for job retry logic"
+  }
+}

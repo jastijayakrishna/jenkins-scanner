@@ -13,7 +13,18 @@
       "Bash(git push:*)",
       "Bash(npm run dev:*)",
       "Bash(mkdir:*)",
-      "Bash(npx next lint:*)"
+      "Bash(npx next lint:*)",
+      "Bash(curl:*)",
+      "Bash(find:*)",
+      "Bash(npx eslint:*)",
+      "Bash(timeout 10s npm run dev)",
+      "Bash(grep:*)",
+      "Bash(touch:*)",
+      "Bash(sed:*)",
+      "Bash(git checkout:*)",
+      "Bash(timeout 5s npm run dev)",
+      "Bash(taskkill:*)",
+      "Bash(npx next dev:*)"
     ],
     "deny": []
   }

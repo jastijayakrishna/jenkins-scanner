@@ -2,17 +2,91 @@
 @tailwind components;
 @tailwind utilities;
 
-/* animation delay helpers */
+/* Dark theme root variables and global styles */
+:root {
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #111111;
+  --bg-tertiary: #1a1a1a;
+  --bg-card: #1e1e1e;
+  --bg-overlay: rgba(0, 0, 0, 0.8);
+  --border-primary: #2a2a2a;
+  --border-secondary: #333333;
+  --text-primary: #ffffff;
+  --text-secondary: #a3a3a3;
+  --text-muted: #6b7280;
+  --accent-primary: #3b82f6;
+  --accent-secondary: #1d4ed8;
+  --accent-success: #10b981;
+  --accent-warning: #f59e0b;
+  --accent-error: #ef4444;
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html, body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  scroll-behavior: smooth;
+}
+
+/* Dark scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-secondary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4a4a4a;
+}
+
+/* Custom glass card styling */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+}
+
+/* Enhanced blob for dark theme */
+.blob {
+  @apply absolute h-96 w-96 rounded-full opacity-20 blur-3xl animate-blob;
+}
+
+.blob-blue {
+  background: linear-gradient(45deg, #1e40af, #3b82f6);
+}
+
+.blob-purple {
+  background: linear-gradient(45deg, #7c3aed, #a855f7);
+}
+
+.blob-cyan {
+  background: linear-gradient(45deg, #0891b2, #06b6d4);
+}
+
+/* Animation helpers */
 .animate-delay-2000 { animation-delay: 2s; }
 .animate-delay-4000 { animation-delay: 4s; }
 
-/* blob shared class */
-.blob {
-  @apply absolute h-96 w-96 rounded-full opacity-25 blur-3xl animate-blob;
-}
 @keyframes pulse-fast {
-  0%, 100% { opacity: .4; }
-  50%      { opacity: 1; }
+  0%, 100% { opacity: .3; }
+  50%      { opacity: .8; }
 }
 .animate-pulse-fast { animation: pulse-fast 1.2s ease-in-out infinite; }
 
@@ -22,7 +96,6 @@
 }
 .animate-fade-in-slow { animation: fade-in-slow 0.4s forwards; }
 
-/* New animations for converter */
 @keyframes fade-in {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -41,28 +114,106 @@
 }
 .animate-slide-up { animation: slide-up 0.5s ease-out; }
 
-/* Code block styling */
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.6); }
+}
+.animate-glow { animation: glow 2s ease-in-out infinite; }
+
+/* Dark theme button styles */
+.btn-primary {
+  @apply bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 
+         text-white font-medium px-6 py-3 rounded-lg transition-all duration-200
+         shadow-lg hover:shadow-xl hover:-translate-y-0.5;
+}
+
+.btn-secondary {
+  @apply bg-gray-800 hover:bg-gray-700 text-gray-100 font-medium px-6 py-3 
+         rounded-lg transition-all duration-200 border border-gray-700 hover:border-gray-600;
+}
+
+/* Dark code block styling */
+pre {
+  @apply bg-gray-900 border border-gray-800 rounded-lg p-4 overflow-x-auto;
+  color: #e5e7eb;
+}
+
 pre code {
   white-space: pre;
   word-wrap: normal;
   overflow-x: auto;
+  color: inherit;
+  background: transparent;
 }
 
-/* Custom scrollbar for code blocks */
+/* Dark scrollbar for code blocks */
 pre::-webkit-scrollbar {
   height: 6px;
 }
 
 pre::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 3px;
 }
 
 pre::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 3px;
 }
 
 pre::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Dark form controls */
+input, textarea, select {
+  @apply bg-gray-900 border-gray-700 text-gray-100 
+         focus:border-blue-500 focus:ring-blue-500/20;
+}
+
+/* Modal and overlay dark styling */
+.modal-backdrop {
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+}
+
+/* Enhanced dropzone for dark theme */
+.dropzone-active {
+  @apply border-blue-500 bg-blue-500/10;
+}
+
+.dropzone-idle {
+  @apply border-gray-600 hover:border-gray-500 bg-gray-900/50;
+}
+
+/* Progress bar dark styling */
+.progress-bar {
+  @apply bg-gray-800 rounded-full overflow-hidden;
+}
+
+.progress-fill {
+  @apply bg-gradient-to-r from-blue-500 to-blue-600 h-full transition-all duration-300;
+}
+
+/* Card hover effects for dark theme */
+.card-hover {
+  @apply transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/10 
+         hover:-translate-y-1 hover:border-gray-600;
+}
+
+/* Status indicators for dark theme */
+.status-success {
+  @apply bg-green-500/20 text-green-400 border-green-500/30;
+}
+
+.status-warning {
+  @apply bg-yellow-500/20 text-yellow-400 border-yellow-500/30;
+}
+
+.status-error {
+  @apply bg-red-500/20 text-red-400 border-red-500/30;
+}
+
+.status-info {
+  @apply bg-blue-500/20 text-blue-400 border-blue-500/30;
 }

@@ -42,15 +42,14 @@ export default function Home() {
 
       {/* ---------- Background & blobs ---------- */}
       <main className="relative min-h-screen overflow-hidden
-                       bg-gradient-to-br from-brand-50 via-white to-brand-100
-                       dark:from-slate-900 dark:via-slate-800 dark:to-slate-900
-                       selection:bg-brand-300">
+                       bg-dark-950 
+                       selection:bg-brand-500/20">
 
         {/* animated blobs (pointer-events-none so they never block clicks) */}
         <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="blob bg-brand-300 top-[-8rem] left-[-8rem]" />
-          <div className="blob bg-brand-500 bottom-[-7rem] left-1/2 animate-delay-2000" />
-          <div className="blob bg-brand-400 top-[-5rem] right-[-6rem] animate-delay-4000" />
+          <div className="blob blob-blue top-[-8rem] left-[-8rem]" />
+          <div className="blob blob-purple bottom-[-7rem] left-1/2 animate-delay-2000" />
+          <div className="blob blob-cyan top-[-5rem] right-[-6rem] animate-delay-4000" />
         </div>
 
         {/* ---------- Content ---------- */}
@@ -58,15 +57,15 @@ export default function Home() {
 
           {/* Title */}
           <header className="text-center mb-12 animate-fade-in">
-            <h1 className="text-5xl font-bold tracking-tight text-gray-900 dark:text-white">
-              Jenkins&nbsp;<span className="text-brand-600">→</span>&nbsp;GitLab
+            <h1 className="text-5xl font-bold tracking-tight text-white">
+              Jenkins&nbsp;<span className="text-brand-400">→</span>&nbsp;GitLab
               <br className="hidden sm:block" />
-              <span className="text-brand-600">Migration&nbsp;Scanner</span>
+              <span className="text-brand-400">Migration&nbsp;Scanner</span>
             </h1>
-            <p className="mt-4 text-xl text-gray-600 dark:text-gray-300">
+            <p className="mt-4 text-xl text-gray-300">
               Upload your&nbsp;Jenkinsfile &nbsp;•&nbsp; Get instant complexity analysis
               <br />
-              <span className="text-brand-600 font-semibold flex items-center justify-center gap-2 mt-2">
+              <span className="text-brand-400 font-semibold flex items-center justify-center gap-2 mt-2">
                 <Sparkles className="w-5 h-5" />
                 NEW: AI-Powered GitLab CI/CD Conversion
                 <Sparkles className="w-5 h-5" />
@@ -75,26 +74,23 @@ export default function Home() {
           </header>
 
           {/* frosted-glass card */}
-          <div className="mx-auto max-w-3xl rounded-3xl bg-white/40
-                          backdrop-blur-xs ring-1 ring-white/30
-                          dark:bg-slate-800/40 dark:ring-slate-600/30
-                          p-8 shadow-xl shadow-brand-900/5">
+          <div className="glass-card mx-auto max-w-3xl p-8 shadow-dark-lg">
 
             <Dropzone onScan={handleScan} />
 
             {result && (
               <div className="mt-10 animate-slide-up space-y-6">
-                <div className="space-y-4 text-sm sm:text-base">
-                  <h2 className="text-2xl font-semibold text-brand-700 dark:text-brand-300">
+                <div className="space-y-4 text-sm sm:text-base text-gray-100">
+                  <h2 className="text-2xl font-semibold text-brand-300">
                     Analysis Results
                   </h2>
 
                   <ul className="grid gap-2 sm:grid-cols-2">
-                    <li><b>Complexity:</b> {result.tier}</li>
-                    <li><b>Type:</b> {result.declarative ? 'Declarative' :
+                    <li><b className="text-white">Complexity:</b> {result.tier}</li>
+                    <li><b className="text-white">Type:</b> {result.declarative ? 'Declarative' :
                                        result.scripted ? 'Scripted' : 'Unknown'}</li>
-                    <li><b>Lines:</b> {result.lineCount}</li>
-                    <li><b>Plugins:</b> {result.pluginCount}</li>
+                    <li><b className="text-white">Lines:</b> {result.lineCount}</li>
+                    <li><b className="text-white">Plugins:</b> {result.pluginCount}</li>
                   </ul>
 
                   {result.pluginHits.length > 0 && (
@@ -116,13 +112,13 @@ export default function Home() {
                   )}
 
                   {result.warnings.length > 0 && (
-                    <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-                      <h3 className="font-medium text-yellow-800 dark:text-yellow-200 mb-2">
+                    <div className="mt-4 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                      <h3 className="font-medium text-yellow-300 mb-2">
                         Migration Warnings
                       </h3>
                       <ul className="space-y-1">
                         {result.warnings.map((warning, idx) => (
-                          <li key={idx} className="text-sm text-yellow-700 dark:text-yellow-300">
+                          <li key={idx} className="text-sm text-yellow-200">
                             • {warning}
                           </li>
                         ))}
@@ -135,10 +131,7 @@ export default function Home() {
                 <div className="flex justify-center pt-4">
                   <button
                     onClick={handleConvert}
-                    className="group px-6 py-3 bg-gradient-to-r from-brand-600 to-brand-700 
-                             hover:from-brand-700 hover:to-brand-800 text-white font-semibold 
-                             rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 
-                             transition-all duration-200 flex items-center gap-3"
+                    className="btn-primary group animate-glow"
                   >
                     <GitBranch className="w-5 h-5" />
                     Convert to GitLab CI/CD

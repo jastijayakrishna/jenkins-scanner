@@ -44,10 +44,10 @@ export default function Dropzone({ onScan }: DropzoneProps) {
       className={`
         group relative mx-auto flex max-w-xl flex-col items-center
         justify-center rounded-3xl border-2 border-dashed p-12 text-center
-        transition
+        transition-all duration-300
         ${isDragActive
-          ? 'border-transparent ring-4 ring-brand-400/60 bg-brand-50/50 dark:bg-brand-700/10'
-          : 'border-gray-300 hover:border-brand-400/70 dark:border-slate-600'}
+          ? 'dropzone-active'
+          : 'dropzone-idle'}
       `}
     >
       <input {...getInputProps()} />
@@ -65,8 +65,7 @@ export default function Dropzone({ onScan }: DropzoneProps) {
       />
 
       {/* icon */}
-      <div className="mb-6 rounded-full bg-brand-100 p-4 text-brand-600
-                      dark:bg-brand-700/20 dark:text-brand-300">
+      <div className="mb-6 rounded-full bg-brand-500/20 p-4 text-brand-400">
         {fileMeta ? (
           <FileText className="h-10 w-10" />
         ) : (
@@ -77,19 +76,19 @@ export default function Dropzone({ onScan }: DropzoneProps) {
       {/* instructions or file meta */}
       {fileMeta ? (
         <div className="space-y-1">
-          <p className="text-lg font-medium text-gray-900 dark:text-gray-100">
+          <p className="text-lg font-medium text-white">
             {fileMeta.name}
           </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-gray-300">
             {(fileMeta.size / 1024).toFixed(1)} KB — drag a new file to replace
           </p>
         </div>
       ) : (
         <>
-          <p className="text-lg font-medium text-gray-900 dark:text-gray-100">
-            Drag & drop your&nbsp;<span className="text-brand-600">Jenkinsfile</span>
+          <p className="text-lg font-medium text-white">
+            Drag & drop your&nbsp;<span className="text-brand-400">Jenkinsfile</span>
           </p>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-1 text-sm text-gray-300">
             …or&nbsp;click to browse (max 2 MB)
           </p>
         </>

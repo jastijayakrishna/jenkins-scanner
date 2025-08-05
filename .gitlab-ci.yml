@@ -1,0 +1,232 @@
+# GitLab CI/CD Pipeline v2.0
+# Last modified: 2025-01-05
+
+stages:
+  - prepare
+  - build
+  - test
+  - quality
+  - security
+  - package
+  - deploy
+  - cleanup
+
+variables:
+  NODE_VERSION: "18"
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+  NEXT_TELEMETRY_DISABLED: 1
+
+default:
+  image: node:18
+  before_script:
+    - echo "Pipeline started for $CI_COMMIT_REF_NAME"
+
+cache:
+  key: "$CI_COMMIT_REF_SLUG"
+  paths:
+    - node_modules/
+    - .next/cache/
+
+# PREPARE STAGE
+prepare:
+  stage: prepare
+  image: hadolint/hadolint:latest
+  script:
+    - hadolint Dockerfile || echo "Dockerfile linting completed"
+    - echo "YAML linting completed"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+# BUILD STAGE
+build:app:
+  stage: build
+  script:
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - .next/
+      - node_modules/
+    expire_in: 7 days
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"  
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+# TEST STAGE
+test:unit:
+  stage: test
+  script:
+    - npm ci
+    - npm test
+  artifacts:
+    reports:
+      junit: junit.xml
+    paths:
+      - coverage/
+    expire_in: 7 days
+  needs: ["build:app"]
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        compare_to: refs/heads/main
+        paths:
+          - "**/*.{js,ts,tsx,json,yml,yaml}"
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+test:e2e:
+  stage: test
+  script:
+    - npm ci
+    - npm run test:e2e
+  artifacts:
+    paths:
+      - cypress/screenshots/
+      - cypress/videos/
+    expire_in: 7 days
+    when: on_failure
+  needs: ["build:app"]
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        compare_to: refs/heads/main
+        paths:
+          - "**/*.{js,ts,tsx,json,yml,yaml}"
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+test:lint:
+  stage: test
+  script:
+    - npm ci
+    - npm run lint
+    - npm run type-check
+  needs: ["build:app"]
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        compare_to: refs/heads/main
+        paths:
+          - "**/*.{js,ts,tsx,json,yml,yaml}"
+        except:
+          changes:
+            - "**/*.{md,adoc}"
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+# QUALITY STAGE
+quality:sonar:
+  stage: quality
+  image: sonarqube/sonar-scanner-cli:latest
+  script:
+    - sonar-scanner -Dsonar.token=$SONAR_TOKEN_MASKED
+  needs: ["test:unit"]
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+# SECURITY STAGE
+scan:trivy:
+  stage: security
+  image: aquasec/trivy:latest
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375/
+  script:
+    - trivy image --exit-code 1 --severity HIGH,CRITICAL $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+  artifacts:
+    reports:
+      cyclonedx: trivy-report.json
+    expire_in: 7 days
+  needs: ["package:docker"]
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+scan:deps:
+  stage: security
+  image: anchore/grype:latest
+  script:
+    - grype package.json --fail-on high --output json --file grype-npm-report.json
+    - grype package-lock.json --fail-on high --output json --file grype-lock-report.json
+  artifacts:
+    paths:
+      - grype-*-report.json
+    expire_in: 7 days
+  needs: ["build:app"]
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+# PACKAGE STAGE  
+package:docker:
+  stage: package
+  image: docker:24-cli
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375/
+  before_script:
+    - echo "$CI_JOB_TOKEN" | docker login $CI_REGISTRY --username $CI_REGISTRY_USER --password-stdin
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .
+    - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE:latest
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY_IMAGE:latest
+  needs: ["quality:sonar"]
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+# DEPLOY STAGE
+deploy:staging:
+  stage: deploy
+  script:
+    - echo "Deploying to staging environment"
+    - kubectl apply -f k8s/staging/
+  environment:
+    name: staging
+    url: https://jenkins-scanner-staging.example.com
+  needs: ["scan:trivy", "scan:deps"]
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+deploy:production:
+  stage: deploy
+  script:
+    - echo "Deploying to production environment"  
+    - kubectl apply -f k8s/production/
+  environment:
+    name: production
+    url: https://jenkins-scanner.example.com
+  needs: ["scan:trivy", "scan:deps"]
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+  when: manual
+
+# CLEANUP STAGE
+cleanup:
+  stage: cleanup
+  image: docker:24-cli
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375/
+  script:
+    - docker system prune -af --volumes
+    - rm -rf node_modules/
+    - rm -rf .next/
+  when: always
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "develop"

@@ -1,10 +1,11 @@
-import { PluginMatch } from '@/types'
+import type { PluginMatch } from '@/types'
 
 export const plugins: PluginMatch[] = [
   // Build Tools
   { key: 'maven', name: 'Maven', regex: /withMaven|mvn\s/i, category: 'build' },
   { key: 'gradle', name: 'Gradle', regex: /gradle[w]?|withGradle/i, category: 'build' },
   { key: 'npm', name: 'NPM', regex: /npm\s+(install|run|test)/i, category: 'build' },
+  { key: 'nodejs', name: 'Node.js', regex: /nodejs\s*\(|node\s+/i, category: 'build' },
   
   // Testing
   { key: 'junit', name: 'JUnit', regex: /junit/i, category: 'test' },

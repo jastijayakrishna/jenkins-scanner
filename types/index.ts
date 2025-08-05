@@ -28,3 +28,9 @@ export interface ConversionResult {
   validationErrors: string[]
   success: boolean
 }
+
+export interface LintResult {
+  status: 'valid' | 'invalid'
+  errors: string[]
+  warnings?: string[]
+}

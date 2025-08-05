@@ -26,7 +26,7 @@ const tierMeta = {
 } as const
 
 export default function ResultModal({ result, onClose }: ResultModalProps) {
-  const meta = tierMeta[result.tier]
+  const meta = tierMeta[result.tier as keyof typeof tierMeta] ?? tierMeta.simple;
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 px-4 py-8 backdrop-blur-sm">
@@ -102,7 +102,7 @@ export default function ResultModal({ result, onClose }: ResultModalProps) {
               Detected Plugins
             </h4>
             <div className="flex flex-wrap gap-2">
-              {result.pluginHits.map(p => (
+              {(result.pluginHits ?? []).map(p => (
                 <span
                   key={p.key}
                   className={`rounded-full bg-gradient-to-r ${meta.colors}/10 px-3 py-1 text-xs font-medium text-slate-700 dark:text-slate-200`}

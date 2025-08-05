@@ -6,7 +6,7 @@ import { scan, scoreVersion } from '@/lib/score'
 console.log('Dropzone bundle uses', scoreVersion)
 
 interface DropzoneProps {
-  onScan: (result: ReturnType<typeof scan>) => void
+  onScan: (result: ReturnType<typeof scan>, jenkinsContent: string) => void
 }
 
 export default function Dropzone({ onScan }: DropzoneProps) {
@@ -22,7 +22,7 @@ export default function Dropzone({ onScan }: DropzoneProps) {
       reader.onload = e => {
         const text = e.target?.result as string
         const result = scan(text)
-        onScan(result)
+        onScan(result, text)
       }
       reader.readAsText(file)
     },

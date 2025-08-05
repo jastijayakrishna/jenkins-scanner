@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { scan } from '@/lib/score'
-import { monitoring, PerformanceTimer } from '@/lib/monitoring'
+import { convertToGitLabCI, validateGitLabCI } from '@/lib/gitlab-converter'
+import { ConversionResult } from '@/types'
 
 // Security: Max file size limit (2MB)
 const MAX_FILE_SIZE = 2 * 1024 * 1024
@@ -56,7 +57,10 @@ function validateInput(content: any): { valid: boolean; error?: string } {
   return { valid: true }
 }
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default function handler(
+  req: NextApiRequest, 
+  res: NextApiResponse<ConversionResult | { error: string; details?: string }>
+) {
   // Only allow POST method
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
@@ -78,30 +82,56 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     // Input validation
     const validation = validateInput(content)
     if (!validation.valid) {
-      return res.status(400).json({ error: validation.error })
+      return res.status(400).json({ error: validation.error || 'Invalid input' })
     }
     
-    // Perform the scan with error handling and monitoring
-    let result
-    const timer = new PerformanceTimer('jenkins_scan')
+    // Scan the Jenkins file
+    let scanResult
     try {
-      result = scan(content)
-      timer.end({ complexity: result.tier })
+      scanResult = scan(content)
     } catch (scanError) {
-      monitoring.trackError(scanError as Error, { endpoint: 'parse', content_length: content.length })
-      console.error('Scan error:', scanError)
+      console.error('Scan error during conversion:', scanError)
       return res.status(500).json({ 
         error: 'Failed to analyze Jenkins file',
         details: process.env.NODE_ENV === 'development' ? (scanError as Error).message : undefined
       })
     }
     
-    // Log successful request (for monitoring)
-    console.log(`[PARSE] Success - IP: ${getRateLimitKey(req)}, Size: ${content.length} bytes`)
+    // Convert to GitLab CI
+    let yaml
+    try {
+      yaml = convertToGitLabCI(scanResult, content)
+    } catch (conversionError) {
+      console.error('Conversion error:', conversionError)
+      return res.status(500).json({ 
+        error: 'Failed to convert Jenkins pipeline to GitLab CI',
+        details: process.env.NODE_ENV === 'development' ? (conversionError as Error).message : undefined
+      })
+    }
     
-    res.status(200).json(result)
+    // Validate the generated YAML
+    let validationResult
+    try {
+      validationResult = validateGitLabCI(yaml)
+    } catch (validationError) {
+      console.error('Validation error:', validationError)
+      // Don't fail the request, just mark as invalid
+      validationResult = { valid: false, errors: ['Validation failed'] }
+    }
+    
+    const conversionResult: ConversionResult = {
+      yaml,
+      scanResult,
+      validationErrors: validationResult.errors,
+      success: validationResult.valid
+    }
+    
+    // Log successful conversion (for monitoring)
+    console.log(`[CONVERT] Success - IP: ${getRateLimitKey(req)}, Complexity: ${scanResult.tier}, Valid: ${validationResult.valid}`)
+    
+    res.status(200).json(conversionResult)
   } catch (error) {
-    console.error('Unexpected error in parse endpoint:', error)
+    console.error('Unexpected error in convert endpoint:', error)
     res.status(500).json({ 
       error: 'An unexpected error occurred',
       details: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined

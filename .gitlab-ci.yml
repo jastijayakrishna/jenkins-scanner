@@ -14,6 +14,7 @@ stages:
   - security
   - package
   - deploy
+  - pages
   - cleanup
 
 variables:
@@ -28,10 +29,15 @@ default:
     - echo "Pipeline started for $CI_COMMIT_REF_NAME"
 
 cache:
-  key: "$CI_JOB_NAME"
-  paths:
-    - node_modules/
-    - .next/cache/
+  - key: 
+      files:
+        - package-lock.json
+    paths:
+      - node_modules/
+  - key: "$CI_JOB_NAME"
+    paths:
+      - .next/cache/
+      - .m2/repository/
 
 # PREPARE STAGE
 prepare:
@@ -150,6 +156,7 @@ scan:trivy:
     reports:
       cyclonedx: trivy-report.json
     expire_in: 7 days
+  allow_failure: true
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == "main"
@@ -166,6 +173,7 @@ scan:deps:
       - grype-*-report.json
     expire_in: 7 days
   needs: ["build:app"]
+  allow_failure: true
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == "main"
@@ -206,6 +214,33 @@ deploy:staging:
   rules:
     - if: $CI_COMMIT_BRANCH == "develop"
 
+review:
+  stage: deploy
+  script:
+    - echo "Deploying Review App for MR $CI_MERGE_REQUEST_IID"
+    - envsubst < k8s/review/deployment.yml | kubectl apply -f -
+    - envsubst < k8s/review/service.yml | kubectl apply -f -
+    - envsubst < k8s/review/ingress.yml | kubectl apply -f -
+  environment:
+    name: review/$CI_MERGE_REQUEST_IID
+    url: https://mr-$CI_MERGE_REQUEST_IID.jenkins-scanner-review.example.com
+    on_stop: stop_review
+  needs: ["package:docker"]
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+stop_review:
+  stage: deploy
+  script:
+    - kubectl delete namespace review-$CI_MERGE_REQUEST_IID || true
+  environment:
+    name: review/$CI_MERGE_REQUEST_IID
+    action: stop
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: manual
+  allow_failure: true
+
 deploy:production:
   stage: deploy
   script:
@@ -219,6 +254,25 @@ deploy:production:
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
   when: manual
+
+# PAGES STAGE
+pages:
+  stage: pages
+  script:
+    - mkdir public/
+    - cp -r coverage/ public/ || echo "No coverage reports found"
+    - cp -r cypress/screenshots/ public/screenshots/ || echo "No screenshots found"
+    - cp -r cypress/videos/ public/videos/ || echo "No videos found"
+    - echo "<h1>Jenkins Scanner Documentation</h1>" > public/index.html
+    - echo "<h2>Coverage Reports</h2><p><a href='coverage/index.html'>View Coverage</a></p>" >> public/index.html
+    - echo "<h2>Test Results</h2><p><a href='screenshots/'>Screenshots</a> | <a href='videos/'>Videos</a></p>" >> public/index.html
+  artifacts:
+    paths:
+      - public
+    expire_in: 7 days
+  needs: ["test:unit", "test:e2e"]
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
 
 # CLEANUP STAGE
 cleanup:

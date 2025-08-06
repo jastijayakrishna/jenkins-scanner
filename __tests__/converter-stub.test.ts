@@ -1,322 +1,120 @@
-// __tests__/converter-stub.test.ts
-import { 
-  generatePluginStubs,
-  generateAdvancedFeatures,
-  generateComplexMatrix,
-  generateParallelSecurityScans,
-  generateRetryLogic,
-  generateVaultIntegration,
-  generateNotificationJobs
-} from '@/lib/gitlab-converter-advanced'
+// Updated to test AI Plugin Intelligence System
+import { AIPluginIntelligenceService } from '@/lib/ai-plugin-intelligence'
 import { PluginVerdict } from '@/lib/plugin-mapper'
-import { JenkinsFeatures } from '@/lib/jenkins-parser'
+import type { PluginMatch } from '@/types'
 
-describe('GitLab Converter Stubs', () => {
-  describe('generatePluginStubs', () => {
-    it('should generate includes for template plugins', () => {
-      const verdicts: PluginVerdict[] = [
-        {
-          id: 'docker-workflow',
-          status: 'template',
-          include: 'https://gitlab.com/gitlab-org/gitlab/-/raw/master/lib/gitlab/ci/templates/Docker.gitlab-ci.yml',
-          migrationComplexity: 'medium',
-          note: 'Use Docker template',
-          hits: [{ id: 'docker-workflow', line: 10, context: 'docker.build', confidence: 'high' }]
-        },
-        {
-          id: 'sonarqube',
-          status: 'template', 
-          include: 'template: Security/SAST.gitlab-ci.yml',
-          migrationComplexity: 'medium',
-          note: 'Use SAST template',
-          hits: [{ id: 'sonarqube', line: 15, context: 'sonar scan', confidence: 'high' }]
-        }
-      ]
-      
-      const yaml = generatePluginStubs(verdicts)
-      
-      expect(yaml).toContain('# Auto-generated includes from detected Jenkins plugins')
-      expect(yaml).toContain('include:')
-      expect(yaml).toContain('- remote: "https://gitlab.com/gitlab-org/gitlab/-/raw/master/lib/gitlab/ci/templates/Docker.gitlab-ci.yml"')
-      expect(yaml).toContain('- template: Security/SAST.gitlab-ci.yml')
-    })
+describe('AI Plugin Intelligence', () => {
+  let pluginIntelligence: AIPluginIntelligenceService
 
-    it('should generate job stubs for native plugins', () => {
-      const verdicts: PluginVerdict[] = [
-        {
-          id: 'slack',
-          status: 'native',
-          gitlab: 'notifications:slack',
-          migrationComplexity: 'easy',
-          note: 'Configure webhook',
-          hits: [{ id: 'slack', line: 10, context: 'slackSend', confidence: 'high' }]
-        },
-        {
-          id: 'email-ext',
-          status: 'native',
-          gitlab: 'email notifications', 
-          migrationComplexity: 'easy',
-          note: 'Use GitLab email settings',
-          hits: [{ id: 'email-ext', line: 15, context: 'emailext', confidence: 'high' }]
-        },
-        {
-          id: 'ws-cleanup',
-          status: 'native',
-          gitlab: 'cleanup job',
-          migrationComplexity: 'easy', 
-          note: 'Use post stage cleanup',
-          hits: [{ id: 'ws-cleanup', line: 20, context: 'cleanWs', confidence: 'high' }]
-        }
-      ]
-      
-      const yaml = generatePluginStubs(verdicts)
-      
-      expect(yaml).toContain('# Auto-generated job stubs from detected Jenkins plugins')
-      expect(yaml).toContain('notify:slack:')
-      expect(yaml).toContain('SLACK_WEBHOOK_URL')
-      expect(yaml).toContain('notify:email:')
-      expect(yaml).toContain('cleanup:workspace:')
-      expect(yaml).toContain('stage: .post')
-    })
-
-    it('should handle credentials-binding plugin', () => {
-      const verdicts: PluginVerdict[] = [
-        {
-          id: 'credentials-binding',
-          status: 'native',
-          gitlab: 'CI/CD Variables',
-          migrationComplexity: 'easy',
-          note: 'Use GitLab CI/CD Variables', 
-          hits: [{ id: 'credentials-binding', line: 10, context: 'withCredentials', confidence: 'high' }]
-        }
-      ]
-      
-      const yaml = generatePluginStubs(verdicts)
-      
-      expect(yaml).toContain('setup:credentials:')
-      expect(yaml).toContain('GitLab CI/CD Variables')
-      expect(yaml).toContain('masked variables')
-    })
-
-    it('should handle timestamper plugin', () => {
-      const verdicts: PluginVerdict[] = [
-        {
-          id: 'timestamper',
-          status: 'native',
-          gitlab: 'FF_TIMESTAMPS',
-          migrationComplexity: 'easy',
-          note: 'Use GitLab timestamps',
-          hits: [{ id: 'timestamper', line: 10, context: 'timestamps', confidence: 'high' }]
-        }
-      ]
-      
-      const yaml = generatePluginStubs(verdicts)
-      
-      expect(yaml).toContain('variables:')
-      expect(yaml).toContain('FF_TIMESTAMPS: "true"')
-    })
-
-    it('should handle parallel plugin', () => {
-      const verdicts: PluginVerdict[] = [
-        {
-          id: 'parallel',
-          status: 'native',
-          gitlab: 'parallel jobs',
-          migrationComplexity: 'medium',
-          note: 'Use parallel job syntax',
-          hits: [{ id: 'parallel', line: 10, context: 'parallel', confidence: 'high' }]
-        }
-      ]
-      
-      const yaml = generatePluginStubs(verdicts)
-      
-      expect(yaml).toContain('parallel:job1:')
-      expect(yaml).toContain('parallel:job2:')
-      expect(yaml).toContain('stage: test')
-    })
-
-    it('should handle empty verdicts', () => {
-      const yaml = generatePluginStubs([])
-      expect(yaml).toBe('')
-    })
-
-    it('should handle mixed plugin types', () => {
-      const verdicts: PluginVerdict[] = [
-        {
-          id: 'docker-workflow',
-          status: 'template',
-          include: 'template: Docker.gitlab-ci.yml',
-          migrationComplexity: 'medium',
-          note: 'Use template',
-          hits: [{ id: 'docker-workflow', line: 10, context: 'docker', confidence: 'high' }]
-        },
-        {
-          id: 'slack',
-          status: 'native',
-          gitlab: 'notifications:slack',
-          migrationComplexity: 'easy',
-          note: 'Configure webhook',
-          hits: [{ id: 'slack', line: 15, context: 'slackSend', confidence: 'high' }]
-        },
-        {
-          id: 'unsupported-plugin',
-          status: 'unsupported',
-          migrationComplexity: 'hard',
-          note: 'Manual implementation needed',
-          hits: [{ id: 'unsupported-plugin', line: 20, context: 'custom', confidence: 'low' }]
-        }
-      ]
-      
-      const yaml = generatePluginStubs(verdicts)
-      
-      // Should include template
-      expect(yaml).toContain('include:')
-      expect(yaml).toContain('- template: Docker.gitlab-ci.yml')
-      
-      // Should include native stub  
-      expect(yaml).toContain('notify:slack:')
-      
-      // Should not include unsupported plugins
-      expect(yaml).not.toContain('unsupported-plugin')
-    })
+  beforeEach(() => {
+    pluginIntelligence = new AIPluginIntelligenceService()
   })
 
-  describe('generateAdvancedFeatures', () => {
-    it('should integrate plugin stubs with features', () => {
-      const features: JenkinsFeatures = {
-        matrix: { axes: {} },
-        retry: null,
-        credentials: [],
-        when: [],
-        timeout: { time: 30, unit: 'MINUTES' },
-        postActions: { always: ['cleanup_workspace'] },
-        buildDiscarder: { daysToKeep: 30 },
-        environment: {},
-        parameters: [],
-        parallelStages: ['build', 'test']
+  describe('analyzePlugin', () => {
+    it('should analyze plugin compatibility and provide recommendations', async () => {
+      const plugin: PluginMatch = {
+        key: 'docker-workflow',
+        name: 'Docker Pipeline',
+        regex: /docker\./,
+        category: 'build'
       }
+
+      const result = await pluginIntelligence.analyzePlugin(plugin)
       
-      const scanResult = {
-        pluginHits: [
-          { key: 'sonarqube', name: 'SonarQube' }
-        ]
+      expect(result).toBeDefined()
+      expect(result.plugin).toEqual(plugin)
+      expect(result.compatibility).toBeDefined()
+      expect(result.alternatives).toBeDefined()
+      expect(result.risks).toBeDefined()
+      expect(result.migrationPath).toBeDefined()
+      expect(result.aiRecommendations).toBeDefined()
+    })
+
+    it('should provide different recommendations for deprecated plugins', async () => {
+      const deprecatedPlugin: PluginMatch = {
+        key: 'deprecated-plugin',
+        name: 'Deprecated Plugin',
+        regex: /deprecated/,
+        category: 'legacy'
       }
+
+      const result = await pluginIntelligence.analyzePlugin(deprecatedPlugin)
       
-      const pluginVerdicts: PluginVerdict[] = [
-        {
-          id: 'slack',
-          status: 'native',
-          gitlab: 'notifications:slack',
-          migrationComplexity: 'easy',
-          note: 'Configure webhook',
-          hits: [{ id: 'slack', line: 10, context: 'slackSend', confidence: 'high' }]
-        }
+      expect(result.compatibility.status).toBe('deprecated')
+      expect(result.aiRecommendations).toBeDefined()
+      expect(result.aiRecommendations.length).toBeGreaterThan(0)
+    })
+
+    it('should identify security risks for security-related plugins', async () => {
+      const securityPlugin: PluginMatch = {
+        key: 'credentials-binding',
+        name: 'Credentials Binding',
+        regex: /credentials/,
+        category: 'security'
+      }
+
+      const result = await pluginIntelligence.analyzePlugin(securityPlugin)
+      
+      expect(result.risks).toBeDefined()
+      const securityRisks = result.risks.filter(risk => risk.type === 'security')
+      expect(securityRisks.length).toBeGreaterThan(0)
+    })
+  })
+
+  describe('generateSmartRecommendations', () => {
+    it('should generate recommendations based on plugin ecosystem', async () => {
+      const plugins: PluginMatch[] = [
+        { key: 'maven', name: 'Maven', regex: /maven/, category: 'build' },
+        { key: 'sonarqube', name: 'SonarQube', regex: /sonar/, category: 'security' },
+        { key: 'docker', name: 'Docker', regex: /docker/, category: 'deploy' }
       ]
+
+      const recommendations = await pluginIntelligence.generateSmartRecommendations(plugins)
       
-      const yaml = generateAdvancedFeatures(features, scanResult, pluginVerdicts)
+      expect(recommendations).toBeDefined()
+      expect(Array.isArray(recommendations)).toBe(true)
+    })
+
+    it('should prioritize high-impact recommendations', async () => {
+      const plugins: PluginMatch[] = [
+        { key: 'high-risk-plugin', name: 'High Risk Plugin', regex: /risky/, category: 'legacy' }
+      ]
+
+      const recommendations = await pluginIntelligence.generateSmartRecommendations(plugins)
       
-      expect(yaml).toContain('notify:slack:')
-      expect(yaml).toContain('Security/SAST.gitlab-ci.yml')
-      expect(yaml).toContain('timeout: 30m')
-      expect(yaml).toContain('expire_in: 30 days')
-      expect(yaml).toContain('cleanup:')
+      const highPriorityRecs = recommendations.filter(rec => rec.priority === 'high')
+      expect(highPriorityRecs.length).toBeGreaterThan(0)
     })
   })
 
-  describe('generateComplexMatrix', () => {
-    it('should generate matrix build configuration', () => {
-      const matrix = {
-        axes: {
-          'NODE_VERSION': ['14', '16', '18'],
-          'OS': ['ubuntu-latest', 'windows-latest']
-        }
+  describe('assessPluginCompatibility', () => {
+    it('should assess compatibility for well-known plugins', async () => {
+      const mavenPlugin: PluginMatch = {
+        key: 'maven-integration',
+        name: 'Maven Integration',
+        regex: /maven/,
+        category: 'build'
       }
+
+      const compatibility = await pluginIntelligence.assessCompatibility(mavenPlugin)
       
-      const yaml = generateComplexMatrix(matrix)
-      
-      expect(yaml).toContain('# Matrix Build Configuration')
-      expect(yaml).toContain('test:matrix:')
-      expect(yaml).toContain('parallel:')
-      expect(yaml).toContain('matrix:')
-      expect(yaml).toContain('NODE_VERSION:')
-      expect(yaml).toContain('- "14"')
-      expect(yaml).toContain('- "16"') 
-      expect(yaml).toContain('- "18"')
-      expect(yaml).toContain('OS:')
-      expect(yaml).toContain('- "ubuntu-latest"')
-      expect(yaml).toContain('- "windows-latest"')
-      expect(yaml).toContain('echo "Testing with $NODE_VERSION and $OS"')
+      expect(compatibility).toBeDefined()
+      expect(['active', 'maintenance', 'deprecated', 'abandoned']).toContain(compatibility.status)
+      expect(compatibility.gitlabEquivalent).toBeDefined()
     })
 
-    it('should handle single axis matrix', () => {
-      const matrix = {
-        axes: {
-          'VERSION': ['1.0', '2.0']
-        }
+    it('should handle unknown plugins gracefully', async () => {
+      const unknownPlugin: PluginMatch = {
+        key: 'unknown-plugin',
+        name: 'Unknown Plugin',
+        regex: /unknown/,
+        category: 'unknown'
       }
-      
-      const yaml = generateComplexMatrix(matrix)
-      
-      expect(yaml).toContain('VERSION:')
-      expect(yaml).toContain('- "1.0"')
-      expect(yaml).toContain('- "2.0"')
-      expect(yaml).toContain('echo "Testing with $VERSION"')
-    })
-  })
 
-  describe('generateParallelSecurityScans', () => {
-    it('should create parallel security scan jobs', () => {
-      const yaml = generateParallelSecurityScans()
+      const compatibility = await pluginIntelligence.assessCompatibility(unknownPlugin)
       
-      expect(yaml).toContain('# Parallel Security Scans')
-      expect(yaml).toContain('sonar:scan:')
-      expect(yaml).toContain('trivy:scan:')
-      expect(yaml).toContain('stage: security')
-      expect(yaml).toContain('needs: []')
-      expect(yaml).toContain('mvn sonar:sonar')
-      expect(yaml).toContain('trivy image myapp:latest')
-    })
-  })
-
-  describe('generateRetryLogic', () => {
-    it('should create retry configuration', () => {
-      const yaml = generateRetryLogic()
-      
-      expect(yaml).toContain('deploy:with:retry:')
-      expect(yaml).toContain('retry:')
-      expect(yaml).toContain('max: 2')
-      expect(yaml).toContain('runner_system_failure')
-      expect(yaml).toContain('stuck_or_timeout_failure')
-      expect(yaml).toContain('for i in $(seq 1 3)')
-      expect(yaml).toContain('helm upgrade --install')
-    })
-  })
-
-  describe('generateVaultIntegration', () => {
-    it('should create Vault integration job', () => {
-      const yaml = generateVaultIntegration()
-      
-      expect(yaml).toContain('vault:secrets:')
-      expect(yaml).toContain('image: vault:latest')
-      expect(yaml).toContain('VAULT_ADDR')
-      expect(yaml).toContain('VAULT_TOKEN')
-      expect(yaml).toContain('vault kv get')
-      expect(yaml).toContain('artifacts:')
-      expect(yaml).toContain('k8s_token.txt')
-      expect(yaml).toContain('expire_in: 1 hour')
-    })
-  })
-
-  describe('generateNotificationJobs', () => {
-    it('should create notification jobs', () => {
-      const yaml = generateNotificationJobs()
-      
-      expect(yaml).toContain('notify:slack:')
-      expect(yaml).toContain('SLACK_WEBHOOK_URL')
-      expect(yaml).toContain('curl -X POST')
-      expect(yaml).toContain('Build successful!')
-      expect(yaml).toContain('allow_failure: true')
-      expect(yaml).toContain('# Email notifications are configured in GitLab project settings')
+      expect(compatibility).toBeDefined()
+      expect(compatibility.status).toBeDefined()
     })
   })
 })

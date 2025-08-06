@@ -70,9 +70,9 @@ export default function Dropzone({ onScan }: DropzoneProps) {
     [onScan],
   );
 
-  const { getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject, open } = useDropzone({
     onDrop,
-    // Accept all file types to allow more flexibility
+    // Accept common text file types - allow all files for flexibility
     accept: undefined,
     maxFiles: 1,
     maxSize: 2 * 1024 * 1024, // 2MB
@@ -82,6 +82,8 @@ export default function Dropzone({ onScan }: DropzoneProps) {
     onDragEnter: () => console.log('Drag enter'),
     onDragLeave: () => console.log('Drag leave'),
     onDragOver: () => console.log('Drag over'),
+    onDropAccepted: (files) => console.log('Files accepted:', files.length),
+    onDropRejected: (rejections) => console.log('Files rejected:', rejections.length),
   });
 
   return (
@@ -90,9 +92,17 @@ export default function Dropzone({ onScan }: DropzoneProps) {
         role: 'button',
         tabIndex: 0,
         'aria-label': 'Upload Jenkinsfile',
+        onClick: (e: React.MouseEvent) => {
+          // Ensure click opens file dialog
+          e.preventDefault();
+          e.stopPropagation();
+          console.log('Dropzone clicked - opening file dialog');
+          open();
+        },
         onKeyDown: (e: React.KeyboardEvent) => {
           if (e.key === 'Enter' || e.key === ' ') {
-            inputRef.current?.click();
+            e.preventDefault();
+            open();
           }
         },
       })}
@@ -145,8 +155,22 @@ export default function Dropzone({ onScan }: DropzoneProps) {
             Drag & drop your&nbsp;<span className="text-brand-600">Jenkinsfile</span>
           </p>
           <p className="mt-1 text-sm text-gray-600">
-            …or&nbsp;click to browse (max 2 MB)
+            …or&nbsp;click anywhere to browse (max 2 MB)
           </p>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log('Browse button clicked');
+              open();
+            }}
+            className="mt-4 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg 
+                     text-sm font-medium transition-colors focus:outline-none focus:ring-2 
+                     focus:ring-brand-500 focus:ring-offset-2"
+          >
+            Browse Files
+          </button>
         </>
       )}
       {error && (

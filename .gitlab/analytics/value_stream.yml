@@ -1,0 +1,159 @@
+# Value Stream Analytics Configuration
+# Block 9: DORA Metrics and Pipeline Analytics
+
+# Value Stream Definition
+value_streams:
+  - name: "Feature Development"
+    description: "From idea to production deployment"
+    
+    stages:
+      - name: "Issue"
+        start_event: "issue_created"
+        end_event: "issue_first_mentioned_in_commit"
+        
+      - name: "Plan"
+        start_event: "issue_first_mentioned_in_commit"
+        end_event: "merge_request_created"
+        
+      - name: "Code"
+        start_event: "merge_request_created" 
+        end_event: "merge_request_merged"
+        
+      - name: "Test"
+        start_event: "merge_request_merged"
+        end_event: "pipeline_success"
+        
+      - name: "Review"
+        start_event: "pipeline_success"
+        end_event: "deployment_success"
+        
+      - name: "Staging"
+        start_event: "deployment_success"
+        end_event: "production_deployment_success"
+
+# DORA Metrics Configuration
+dora_metrics:
+  deployment_frequency:
+    enabled: true
+    target: "daily"
+    measurement_window: "30_days"
+    
+  lead_time_for_changes:
+    enabled: true
+    target: "< 2 days"
+    measurement_window: "30_days"
+    start_event: "merge_request_created"
+    end_event: "production_deployment_success"
+    
+  mean_time_to_recovery:
+    enabled: true
+    target: "< 1 hour"
+    measurement_window: "30_days"
+    incident_detection: "pipeline_failure"
+    recovery_detection: "pipeline_success"
+    
+  change_failure_rate:
+    enabled: true
+    target: "< 15%"
+    measurement_window: "30_days"
+    failure_detection:
+      - "pipeline_failure"
+      - "deployment_failure"
+      - "rollback_executed"
+
+# Pipeline Analytics
+pipeline_analytics:
+  job_duration_tracking:
+    enabled: true
+    alert_threshold: "15_minutes"
+    
+  success_rate_tracking:
+    enabled: true
+    target: "> 95%"
+    
+  resource_utilization:
+    enabled: true
+    track_runner_minutes: true
+    
+  cost_analysis:
+    enabled: true
+    track_compute_costs: true
+
+# Custom Dashboards
+dashboards:
+  - name: "Executive Dashboard"
+    widgets:
+      - type: "dora_metrics_summary"
+      - type: "deployment_frequency_chart"
+      - type: "lead_time_trend"
+      - type: "success_rate_gauge"
+      
+  - name: "Engineering Dashboard"  
+    widgets:
+      - type: "pipeline_duration_chart"
+      - type: "test_success_rate"
+      - type: "security_findings_summary"
+      - type: "code_coverage_trend"
+      
+  - name: "Security Dashboard"
+    widgets:
+      - type: "vulnerability_trends"
+      - type: "dependency_risks"
+      - type: "compliance_status"
+      - type: "security_gate_pass_rate"
+
+# Reporting Configuration
+reporting:
+  weekly_reports:
+    enabled: true
+    recipients: ["team-leads@company.com"]
+    metrics:
+      - "deployment_frequency"
+      - "pipeline_success_rate"
+      - "security_findings"
+      
+  monthly_reports:
+    enabled: true
+    recipients: ["executives@company.com"]
+    metrics:
+      - "dora_metrics_summary"
+      - "cost_analysis"
+      - "compliance_status"
+
+# Alert Thresholds
+alerts:
+  pipeline_duration:
+    warning: "10_minutes"
+    critical: "15_minutes"
+    
+  success_rate:
+    warning: "90%"
+    critical: "85%"
+    
+  security_findings:
+    critical_findings: "immediate"
+    high_findings: "4_hours"
+    
+  deployment_frequency:
+    below_target: "weekly"
+
+# Export Configuration
+data_export:
+  prometheus_metrics:
+    enabled: true
+    endpoint: "/metrics"
+    metrics:
+      - "gitlab_pipeline_duration_seconds"
+      - "gitlab_deployment_frequency_total"
+      - "gitlab_lead_time_seconds"
+      - "gitlab_mttr_seconds"
+      - "gitlab_change_failure_rate_ratio"
+      
+  grafana_integration:
+    enabled: true
+    dashboard_templates: true
+    
+  json_export:
+    enabled: true
+    schedule: "daily"
+    s3_bucket: "company-analytics"

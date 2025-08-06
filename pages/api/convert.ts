@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { scan } from '@/lib/score'
-import { convertToGitLabCI, validateGitLabCI } from '@/lib/gitlab-converter'
+import { aiMigrationSystem } from '@/lib/ai-migration-system'
 import { ConversionResult } from '@/types'
 
 // Security: Max file size limit (2MB)
@@ -57,7 +57,7 @@ function validateInput(content: any): { valid: boolean; error?: string } {
   return { valid: true }
 }
 
-export default function handler(
+export default async function handler(
   req: NextApiRequest, 
   res: NextApiResponse<ConversionResult | { error: string; details?: string }>
 ) {
@@ -97,30 +97,35 @@ export default function handler(
       })
     }
     
-    // Convert to GitLab CI
-    let yaml
+    // Convert using unified AI system
+    let migrationResult
     try {
-      yaml = convertToGitLabCI(scanResult, content)
+      migrationResult = await aiMigrationSystem.migrate({
+        jenkinsfile: content,
+        scanResult,
+        options: {
+          targetComplexity: 'balanced',
+          optimizeForSpeed: true,
+          includeSecurityScanning: true,
+          enableParallelization: true
+        }
+      })
     } catch (conversionError) {
-      console.error('Conversion error:', conversionError)
+      console.error('AI Migration error:', conversionError)
       return res.status(500).json({ 
         error: 'Failed to convert Jenkins pipeline to GitLab CI',
         details: process.env.NODE_ENV === 'development' ? (conversionError as Error).message : undefined
       })
     }
     
-    // Validate the generated YAML
-    let validationResult
-    try {
-      validationResult = validateGitLabCI(yaml)
-    } catch (validationError) {
-      console.error('Validation error:', validationError)
-      // Don't fail the request, just mark as invalid
-      validationResult = { valid: false, errors: ['Validation failed'] }
+    // Simple validation
+    const validationResult = {
+      valid: migrationResult.success && migrationResult.gitlabYaml.includes('stages:'),
+      errors: migrationResult.success ? [] : ['Conversion did not complete successfully']
     }
     
     const conversionResult: ConversionResult = {
-      yaml,
+      yaml: migrationResult.gitlabYaml,
       scanResult,
       validationErrors: validationResult.errors,
       success: validationResult.valid

@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { scan } from '@/lib/score'
 import { monitoring, PerformanceTimer } from '@/lib/monitoring'
+import { PerformanceOptimizer, OptimizedPluginScanner } from '@/lib/performance-optimizer'
 
 // Security: Max file size limit (2MB)
 const MAX_FILE_SIZE = 2 * 1024 * 1024
@@ -81,12 +82,22 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       return res.status(400).json({ error: validation.error })
     }
     
-    // Perform the scan with error handling and monitoring
+    // Perform optimized scan with intelligent caching and monitoring
     let result
     const timer = new PerformanceTimer('jenkins_scan')
     try {
+      // Use optimized parsing and scanning
+      const parsedData = PerformanceOptimizer.parseJenkinsfile(content)
+      const optimizedPlugins = OptimizedPluginScanner.scanPlugins(content)
+      
+      // Enhance the original scan with optimized data
       result = scan(content)
-      timer.end({ complexity: result.tier })
+      
+      // Add performance insights
+      ;(result as any).performanceMetrics = PerformanceOptimizer.getPerformanceMetrics()
+      ;(result as any).optimizedPluginCount = optimizedPlugins.length
+      
+      timer.end({ complexity: result.tier, optimized: 'true' })
     } catch (scanError) {
       monitoring.trackError(scanError as Error, { endpoint: 'parse', content_length: content.length })
       console.error('Scan error:', scanError)

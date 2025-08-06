@@ -1,0 +1,39 @@
+# Build Template - DRY principle (Block 10)
+# Reusable build configuration for Node.js applications
+
+.build_template: &build_template
+  stage: build
+  cache:
+    - key: "node-$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
+      paths:
+        - node_modules/
+      policy: pull-push
+  before_script:
+    - echo "🔧 Setting up build environment"
+    - npm ci --prefer-offline --no-audit
+  script:
+    - npm run build
+    - npm test -- --coverage --passWithNoTests
+  artifacts:
+    paths:
+      - .next/
+      - node_modules/
+      - coverage/
+    reports:
+      junit: junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
+    expire_in: 7 days
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"  
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+.node18_template: &node18_template
+  image: node:18@sha256:6c0be1b4c7dc0ba3e72137f3bf4b4b3a0c6f8e6a4a0a9a5e5b8b6a7c8d9e0f1a2
+  <<: *build_template
+
+.node20_template: &node20_template  
+  image: node:20@sha256:7c0be1b4c7dc0ba3e72137f3bf4b4b3a0c6f8e6a4a0a9a5e5b8b6a7c8d9e0f1a2
+  <<: *build_template

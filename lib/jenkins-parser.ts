@@ -1,5 +1,23 @@
 // lib/jenkins-parser.ts
-// Advanced Jenkins pipeline parsing utilities
+// Jenkins pipeline parsing with metadata tracking and fallback tokenizer
+
+// Enhanced metadata tracking for traceability
+export interface ParseMetadata {
+  source_file?: string
+  line_numbers: {
+    pipeline?: number
+    stages: Record<string, number>
+    plugins: Record<string, number>
+  }
+  parsing_method: 'tree-sitter' | 'fallback-regex' | 'hybrid'
+  confidence_score: number // 0-1, how confident we are in the parsing
+  unparsed_blocks: Array<{
+    content: string
+    line_start: number
+    line_end: number
+    reason: string
+  }>
+}
 
 export interface JenkinsParameter {
   name: string
@@ -49,6 +67,101 @@ export interface JenkinsFeatures {
     expression?: string
   }>
   parallelStages: string[]
+  // Enhanced with metadata
+  metadata?: ParseMetadata
+}
+
+// Fallback Tokenizer for malformed Jenkinsfiles
+export class FallbackTokenizer {
+  private static readonly STAGE_REGEX = /stage\s*\(\s*['"]([^'"]+)['"]\s*\)\s*\{([\s\S]*?)(?=\n\s*stage\s*\(|\n\s*post\s*\{|\n\s*}\s*$)/gi
+  private static readonly STEPS_REGEX = /steps\s*\{([\s\S]*?)\n\s*}/gi
+  private static readonly ENVIRONMENT_REGEX = /environment\s*\{([\s\S]*?)\n\s*}/gi
+  private static readonly PLUGIN_REGEX = /(withSonarQubeEnv|withCredentials|withMaven|docker\.|junit|publishHTML|archiveArtifacts|emailext|sh\s+)/gi
+
+  static parseWithFallback(content: string, fileName?: string): { features: JenkinsFeatures, metadata: ParseMetadata } {
+    const lines = content.split('\n')
+    const metadata: ParseMetadata = {
+      source_file: fileName,
+      line_numbers: {
+        stages: {},
+        plugins: {}
+      },
+      parsing_method: 'fallback-regex',
+      confidence_score: 0.7, // Lower confidence for regex parsing
+      unparsed_blocks: []
+    }
+
+    const features: JenkinsFeatures = {
+      parameters: [],
+      matrix: null,
+      timeout: null,
+      retry: null,
+      postActions: {},
+      buildDiscarder: null,
+      environment: {},
+      credentials: [],
+      when: [],
+      parallelStages: [],
+      metadata
+    }
+
+    // Extract stages with line numbers
+    let stageMatch
+    this.STAGE_REGEX.lastIndex = 0 // Reset regex
+    while ((stageMatch = this.STAGE_REGEX.exec(content)) !== null) {
+      const stageName = stageMatch[1]
+      const stageContent = stageMatch[2]
+      const lineNumber = content.substring(0, stageMatch.index).split('\n').length
+      
+      metadata.line_numbers.stages[stageName] = lineNumber
+      
+      // Extract plugins from this stage
+      let pluginMatch
+      this.PLUGIN_REGEX.lastIndex = 0
+      while ((pluginMatch = this.PLUGIN_REGEX.exec(stageContent)) !== null) {
+        const plugin = pluginMatch[1].trim()
+        const pluginLineNumber = lineNumber + stageContent.substring(0, pluginMatch.index).split('\n').length
+        metadata.line_numbers.plugins[plugin] = pluginLineNumber
+      }
+    }
+
+    // Extract environment variables
+    let envMatch
+    this.ENVIRONMENT_REGEX.lastIndex = 0
+    while ((envMatch = this.ENVIRONMENT_REGEX.exec(content)) !== null) {
+      const envContent = envMatch[1]
+      const envVars = envContent.match(/(\w+)\s*=\s*['"]([^'"]+)['"]/g) || []
+      
+      envVars.forEach(envVar => {
+        const [, key, value] = envVar.match(/(\w+)\s*=\s*['"]([^'"]+)['"]/) || []
+        if (key && value) {
+          features.environment[key] = value
+        }
+      })
+    }
+
+    // Mark unparsed complex blocks
+    const complexBlocks = content.match(/script\s*\{[\s\S]*?\}/gi) || []
+    complexBlocks.forEach((block, index) => {
+      const blockIndex = content.indexOf(block)
+      const lineStart = content.substring(0, blockIndex).split('\n').length
+      const lineEnd = lineStart + block.split('\n').length - 1
+      
+      metadata.unparsed_blocks.push({
+        content: block,
+        line_start: lineStart,
+        line_end: lineEnd,
+        reason: 'Complex Groovy script block - requires manual review'
+      })
+    })
+
+    // Adjust confidence based on how much we parsed successfully
+    const totalLines = lines.length
+    const parsedLines = Object.keys(metadata.line_numbers.stages).length * 5 // Estimate 5 lines per stage
+    metadata.confidence_score = Math.min(0.9, parsedLines / totalLines + 0.4)
+
+    return { features, metadata }
+  }
 }
 
 // Extract all parameters from Jenkins pipeline

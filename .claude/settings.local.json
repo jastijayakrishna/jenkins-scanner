@@ -24,7 +24,10 @@
       "Bash(git checkout:*)",
       "Bash(timeout 5s npm run dev)",
       "Bash(taskkill:*)",
-      "Bash(npx next dev:*)"
+      "Bash(npx next dev:*)",
+      "Bash(ls:*)",
+      "Bash(cp:*)",
+      "Bash(chmod:*)"
     ],
     "deny": []
   }

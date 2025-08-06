@@ -7,7 +7,7 @@ import ResultModal from '@/components/ResultModal'
 import PluginReport from '@/components/PluginReport'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { ScanResult, ConversionResult } from '@/types'
-import { convertToGitLabCI, validateGitLabCI } from '@/lib/gitlab-converter'
+// Using unified AI migration system via API endpoints
 import { PluginVerdict, PluginScanSummary } from '@/lib/plugin-mapper'
 import { GitBranch, ArrowRight, Sparkles, BarChart3, Loader2, AlertCircle } from 'lucide-react'
 
@@ -25,6 +25,8 @@ export default function Home() {
   const [showConverter, setShowConverter] = useState(false)
   const [showResults, setShowResults] = useState(false)
   const [showPluginAnalysis, setShowPluginAnalysis] = useState(false)
+  const [showSplitView, setShowSplitView] = useState(false)
+  const [activePanel, setActivePanel] = useState<'analysis' | 'config'>('analysis')
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [analysisError, setAnalysisError] = useState<string | null>(null)
 
@@ -76,19 +78,42 @@ export default function Home() {
     }
   }
 
-  const handleConvert = () => {
+  const handleConvert = async () => {
     if (!result || !jenkinsContent) return
 
-    const yaml = convertToGitLabCI(result, jenkinsContent)
-    const validation = validateGitLabCI(yaml)
-    
-    setConversionResult({
-      yaml,
-      scanResult: result,
-      validationErrors: validation.errors,
-      success: validation.valid
-    })
-    setShowConverter(true)
+    try {
+      const response = await fetch('/api/convert', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: jenkinsContent
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error(`Conversion failed: ${response.statusText}`)
+      }
+
+      const conversionData = await response.json()
+      
+      setConversionResult({
+        yaml: conversionData.yaml,
+        scanResult: conversionData.scanResult,
+        validationErrors: conversionData.validationErrors || [],
+        success: conversionData.success
+      })
+      
+      // Show split view instead of separate modals
+      setShowSplitView(true)
+      setShowResults(false)
+      setShowPluginAnalysis(false)
+      setShowConverter(false)
+    } catch (error) {
+      console.error('Conversion error:', error)
+      // Could add error state here if needed
+    }
   }
 
   return (
@@ -203,19 +228,20 @@ export default function Home() {
         </section>
       </main>
 
-      {/* GitLab Converter Modal */}
-      {showConverter && conversionResult && (
+      {/* Standalone GitLab Converter Modal - Only show when not in split view */}
+      {showConverter && conversionResult && !showSplitView && (
         <GitLabConverter 
           result={conversionResult} 
           onClose={() => setShowConverter(false)} 
         />
       )}
 
-      {/* Basic Result Modal */}
-      {showResults && result && !showPluginAnalysis && (
+      {/* Basic Result Modal - Only show when not in split view */}
+      {showResults && result && !showSplitView && (
         <ErrorBoundary>
           <ResultModal 
             result={result} 
+            jenkinsContent={jenkinsContent}
             onClose={() => setShowResults(false)}
             onViewPluginAnalysis={() => setShowPluginAnalysis(true)}
             isAnalyzing={isAnalyzing}
@@ -225,8 +251,8 @@ export default function Home() {
         </ErrorBoundary>
       )}
 
-      {/* Advanced Plugin Analysis Modal */}
-      {showPluginAnalysis && pluginAnalysis && (
+      {/* Plugin Analysis Modal - Only show when not in split view */}
+      {showPluginAnalysis && pluginAnalysis && !showSplitView && (
         <ErrorBoundary>
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
             <div className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden">
@@ -272,6 +298,104 @@ export default function Home() {
                   summary={pluginAnalysis.summary}
                   migrationChecklist={pluginAnalysis.migrationChecklist}
                 />
+              </div>
+            </div>
+          </div>
+        </ErrorBoundary>
+      )}
+
+      {/* Split View - Plugin Analysis + GitLab CI Conversion */}
+      {showSplitView && pluginAnalysis && conversionResult && (
+        <ErrorBoundary>
+          <div className="fixed inset-0 z-50 bg-white animate-fade-in">
+            {/* Header */}
+            <div className="h-16 px-4 lg:px-6 border-b border-gray-200 bg-gradient-to-r from-brand-50 to-blue-50 flex items-center justify-between">
+              <div className="flex-1">
+                <h1 className="text-lg lg:text-xl font-bold text-gray-900">
+                  Jenkins to GitLab CI Migration
+                </h1>
+                <p className="text-xs lg:text-sm text-gray-600 hidden sm:block">
+                  Plugin Analysis & Generated Configuration
+                </p>
+              </div>
+
+              {/* Mobile Panel Toggle */}
+              <div className="flex lg:hidden items-center gap-2 mr-4">
+                <button
+                  onClick={() => setActivePanel('analysis')}
+                  className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                    activePanel === 'analysis'
+                      ? 'bg-brand-600 text-white'
+                      : 'bg-white/50 text-gray-600 hover:bg-white/80'
+                  }`}
+                >
+                  Analysis
+                </button>
+                <button
+                  onClick={() => setActivePanel('config')}
+                  className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                    activePanel === 'config'
+                      ? 'bg-brand-600 text-white'
+                      : 'bg-white/50 text-gray-600 hover:bg-white/80'
+                  }`}
+                >
+                  Config
+                </button>
+              </div>
+
+              <button
+                onClick={() => {
+                  setShowSplitView(false)
+                  setShowResults(true)
+                }}
+                className="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-white/50"
+              >
+                <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Split Content - Responsive */}
+            <div className="flex flex-col lg:flex-row h-[calc(100vh-4rem)]">
+              {/* Left Panel - Plugin Analysis */}
+              <div className={`w-full lg:w-1/2 border-b lg:border-b-0 lg:border-r border-gray-200 flex flex-col min-h-0 transition-all duration-300 ${
+                activePanel === 'analysis' ? 'lg:flex' : 'hidden lg:flex'
+              }`}>
+                <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 lg:block hidden flex-shrink-0">
+                  <h2 className="text-base lg:text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <BarChart3 className="w-4 h-4 lg:w-5 lg:h-5 text-brand-600" />
+                    <span className="hidden sm:inline">Plugin Compatibility Analysis</span>
+                    <span className="sm:hidden">Plugin Analysis</span>
+                  </h2>
+                </div>
+                <div className="flex-1 overflow-y-auto p-2 lg:p-4 min-h-0">
+                  <PluginReport
+                    verdicts={pluginAnalysis.verdicts}
+                    summary={pluginAnalysis.summary}
+                    migrationChecklist={pluginAnalysis.migrationChecklist}
+                  />
+                </div>
+              </div>
+
+              {/* Right Panel - GitLab CI Configuration */}
+              <div className={`w-full lg:w-1/2 flex flex-col min-h-0 ${
+                activePanel === 'config' ? 'lg:flex' : 'hidden lg:flex'
+              }`}>
+                <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 lg:block hidden flex-shrink-0">
+                  <h2 className="text-base lg:text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <GitBranch className="w-4 h-4 lg:w-5 lg:h-5 text-brand-600" />
+                    <span className="hidden sm:inline">Generated GitLab CI Configuration</span>
+                    <span className="sm:hidden">GitLab CI Config</span>
+                  </h2>
+                </div>
+                <div className="flex-1 min-h-0">
+                  <GitLabConverter 
+                    result={conversionResult} 
+                    onClose={() => setShowSplitView(false)}
+                    isEmbedded={true}
+                  />
+                </div>
               </div>
             </div>
           </div>

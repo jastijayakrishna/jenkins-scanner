@@ -1,82 +1,197 @@
-import { convertToGitLabCI } from '@/lib/gitlab-converter'
+// Updated to test parameter extraction in the unified AI system
+import { UnifiedAIMigrationSystem } from '@/lib/ai-migration-system'
 import { ScanResult } from '@/types'
 
-describe('Parameter Extraction Feature', () => {
-  it('should extract and convert Jenkins parameters to GitLab variables with workflow rules', () => {
-    const jenkinsContent = `
+describe('Parameter Extraction in Unified AI System', () => {
+  let migrationSystem: UnifiedAIMigrationSystem
+
+  beforeEach(() => {
+    migrationSystem = new UnifiedAIMigrationSystem()
+  })
+
+  const mockScanResult: ScanResult = {
+    pluginHits: [
+      { key: 'parameters', name: 'Parameters', category: 'build' }
+    ],
+    pluginCount: 1,
+    scripted: false,
+    declarative: true,
+    tier: 'medium',
+    lineCount: 40,
+    warnings: [],
+    timestamp: Date.now()
+  }
+
+  describe('Parameter Migration', () => {
+    it('should extract and migrate string parameters', async () => {
+      const jenkinsfile = `
 pipeline {
     agent any
-    
     parameters {
-        string(name: 'DEPLOY_ENV', defaultValue: 'staging', description: 'Target deployment environment')
-        booleanParam(name: 'RUN_TESTS', defaultValue: true, description: 'Execute test suite')
-        choice(name: 'BUILD_TYPE', choices: ['Debug', 'Release', 'Profile'], description: 'Build configuration type')
-        text(name: 'RELEASE_NOTES', defaultValue: '', description: 'Release notes for this build')
+        string(name: 'ENVIRONMENT', defaultValue: 'dev', description: 'Deployment environment')
+        string(name: 'VERSION', defaultValue: '1.0.0', description: 'Application version')
     }
-    
-    environment {
-        APP_NAME = 'my-app'
-        VERSION = '1.0.0'
-    }
-    
     stages {
-        stage('Build') {
+        stage('Deploy') {
             steps {
-                sh 'mvn clean package'
+                sh "echo Deploying version \${params.VERSION} to \${params.ENVIRONMENT}"
             }
         }
     }
 }
 `
+      const result = await migrationSystem.migrate({
+        jenkinsfile,
+        scanResult: mockScanResult,
+        options: { useAI: true }
+      })
 
-    const scanResult: ScanResult = {
-      pluginHits: [
-        { key: 'maven', name: 'Maven', category: 'build' },
-        { key: 'parameters', name: 'Parameters', category: 'other' }
-      ],
-      pluginCount: 2,
-      scripted: false,
-      declarative: true,
-      tier: 'simple',
-      lineCount: 25,
-      warnings: [],
-      timestamp: Date.now()
+      expect(result.success).toBe(true)
+      expect(result.yaml).toContain('variables:')
+      expect(result.yaml).toContain('ENVIRONMENT')
+      expect(result.yaml).toContain('VERSION')
+    })
+
+    it('should handle boolean parameters', async () => {
+      const jenkinsfile = `
+pipeline {
+    agent any
+    parameters {
+        booleanParam(name: 'DEPLOY_TO_PROD', defaultValue: false, description: 'Deploy to production?')
+        booleanParam(name: 'RUN_TESTS', defaultValue: true, description: 'Run tests?')
     }
+    stages {
+        stage('Test') {
+            when { params.RUN_TESTS }
+            steps {
+                sh 'npm test'
+            }
+        }
+        stage('Deploy') {
+            when { params.DEPLOY_TO_PROD }
+            steps {
+                sh 'deploy.sh'
+            }
+        }
+    }
+}
+`
+      const result = await migrationSystem.migrate({
+        jenkinsfile,
+        scanResult: mockScanResult,
+        options: { useAI: true }
+      })
 
-    const yaml = convertToGitLabCI(scanResult, jenkinsContent)
-    
-    console.log('Generated YAML with parameters:')
-    console.log('=====================================')
-    console.log(yaml)
-    console.log('=====================================')
-    
-    // Check workflow rules are added
-    expect(yaml).toContain('workflow:')
-    expect(yaml).toContain('rules:')
-    expect(yaml).toContain('$CI_PIPELINE_SOURCE == "web"')
-    expect(yaml).toContain('$CI_PIPELINE_SOURCE == "api"')
-    
-    // Check parameters are converted to variables
-    expect(yaml).toContain('variables:')
-    expect(yaml).toContain('DEPLOY_ENV: "staging"')
-    expect(yaml).toContain('RUN_TESTS: "true"')
-    expect(yaml).toContain('BUILD_TYPE: "Debug"')  // First choice as default
-    expect(yaml).toContain('RELEASE_NOTES: ""')
-    
-    // Check parameter descriptions are included as comments
-    expect(yaml).toContain('# Target deployment environment')
-    expect(yaml).toContain('# Execute test suite')
-    expect(yaml).toContain('# Build configuration type')
-    expect(yaml).toContain('# Release notes for this build')
-    
-    // Check choice options are documented
-    expect(yaml).toContain('# Options: Debug, Release, Profile')
-    
-    // Check environment variables are also included
-    expect(yaml).toContain('APP_NAME: "my-app"')
-    expect(yaml).toContain('VERSION: "1.0.0"')
-    
-    // Check that parameters appear in workflow rules
-    expect(yaml).toMatch(/variables:\s+DEPLOY_ENV: "staging"/)
+      expect(result.success).toBe(true)
+      expect(result.yaml).toContain('variables:')
+      expect(result.yaml).toContain('DEPLOY_TO_PROD')
+      expect(result.yaml).toContain('RUN_TESTS')
+      expect(result.yaml).toContain('rules:')
+    })
+
+    it('should migrate choice parameters to GitLab variables', async () => {
+      const jenkinsfile = `
+pipeline {
+    agent any
+    parameters {
+        choice(name: 'BUILD_TYPE', choices: ['debug', 'release', 'profile'], description: 'Build type')
+    }
+    stages {
+        stage('Build') {
+            steps {
+                sh "make \${params.BUILD_TYPE}"
+            }
+        }
+    }
+}
+`
+      const result = await migrationSystem.migrate({
+        jenkinsfile,
+        scanResult: mockScanResult,
+        options: { useAI: true }
+      })
+
+      expect(result.success).toBe(true)
+      expect(result.yaml).toContain('variables:')
+      expect(result.yaml).toContain('BUILD_TYPE')
+      expect(result.analysisReport).toContain('choice parameter')
+    })
+
+    it('should handle file parameters with recommendations', async () => {
+      const jenkinsfile = `
+pipeline {
+    agent any
+    parameters {
+        file(name: 'CONFIG_FILE', description: 'Configuration file to upload')
+    }
+    stages {
+        stage('Configure') {
+            steps {
+                sh 'cp \${params.CONFIG_FILE} config.yml'
+            }
+        }
+    }
+}
+`
+      const result = await migrationSystem.migrate({
+        jenkinsfile,
+        scanResult: mockScanResult,
+        options: { useAI: true }
+      })
+
+      expect(result.success).toBe(true)
+      expect(result.insights).toBeDefined()
+      
+      const fileParamInsights = result.insights?.filter(insight => 
+        insight.description.toLowerCase().includes('file parameter')
+      )
+      expect(fileParamInsights?.length).toBeGreaterThan(0)
+    })
+
+    it('should provide migration recommendations for complex parameter usage', async () => {
+      const jenkinsfile = `
+pipeline {
+    agent any
+    parameters {
+        string(name: 'BRANCH', defaultValue: 'main', description: 'Git branch')
+        choice(name: 'DEPLOY_ENV', choices: ['dev', 'staging', 'prod'], description: 'Environment')
+        booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip tests?')
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: "\${params.BRANCH}", url: 'https://github.com/example/repo.git'
+            }
+        }
+        stage('Test') {
+            when { not { params.SKIP_TESTS } }
+            steps {
+                sh 'npm test'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sh "deploy.sh --env \${params.DEPLOY_ENV}"
+            }
+        }
+    }
+}
+`
+      const result = await migrationSystem.migrate({
+        jenkinsfile,
+        scanResult: mockScanResult,
+        options: { useAI: true }
+      })
+
+      expect(result.success).toBe(true)
+      expect(result.yaml).toContain('variables:')
+      expect(result.insights).toBeDefined()
+      expect(result.recommendations).toBeDefined()
+      
+      const parameterRecommendations = result.recommendations?.filter(rec => 
+        rec.toLowerCase().includes('parameter') || rec.toLowerCase().includes('variable')
+      )
+      expect(parameterRecommendations?.length).toBeGreaterThan(0)
+    })
   })
 })

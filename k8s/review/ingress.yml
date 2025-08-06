@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: jenkins-scanner-ingress
+  namespace: __NAMESPACE__
+  labels:
+    app: jenkins-scanner
+    environment: __ENVIRONMENT__
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  tls:
+  - hosts:
+    - __NAMESPACE__.jenkins-scanner-review.example.com
+    secretName: jenkins-scanner-review-tls
+  rules:
+  - host: __NAMESPACE__.jenkins-scanner-review.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: jenkins-scanner-service
+            port:
+              number: 80

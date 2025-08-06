@@ -1,0 +1,132 @@
+--- a/.gitlab-ci.yml
++++ b/.gitlab-ci.yml
+@@
++# -------------------------------------------------
++# Native Slack template & future security templates
++# -------------------------------------------------
++include:
++  - template: Slack/Messages.gitlab-ci.yml
++#  - template: Security/Container-Scanning.gitlab-ci.yml   # enable later
++
+@@
+-default:
+-  image: maven:3.9-eclipse-temurin-17@sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
++default:
++  image: maven:3.9-eclipse-temurin-17@sha256:<real-digest-here>
+@@
+-  - build
+-  - test
++  - build          # compile + tests merged
+   - static-analysis
+@@
+-# Build & Unit Tests (matrix build for Java 17/21 and MySQL/Postgres)
+-build_compile:
++# Build & Unit Tests (single matrix job)
++build_test:
+   stage: build
+   parallel:
+     matrix:
+@@
+-  script:
+-    - mvn -B -P${LANG} clean compile
++  script:
++    - mvn -B -P${LANG} clean compile test
+   tags:
+     - docker
+   artifacts:
+     paths:
+-      - target/*
++      - target/*.jar
+     expire_in: 1 day
++    reports:
++      junit: "**/target/surefire-reports/*.xml"
+   timeout: 20m
+-
+-unit_tests:
+-  stage: test
+-  parallel:
+-    matrix:
+-      - LANG: ["java17", "java21"]
+-        DB: ["mysql", "postgres"]
+-  script:
+-    - mvn -B -P${LANG} test
+-  artifacts:
+-    reports:
+-      junit: "**/target/surefire-reports/*.xml"  # Plugin: junit (confidence: 0.99)
+-    paths:
+-      - target/*
+-    expire_in: 1 day
+-  tags:
+-    - docker
+-  timeout: 15m
+-
+-stash_artifacts:
+-  stage: test
+-  rules:
+-    - if: '$DB == "mysql" && $LANG == "java17"'
+-      when: always
+-    - when: never
+-  script:
+-    - echo "Stashing artifacts for java17-mysql"
+-    # Plugin: pipeline-utility-steps (stash) mapped to artifacts (confidence: 0.95)
+-  artifacts:
+-    paths:
+-      - target/*
+-    name: "jar-java17-mysql"
+-    expire_in: 1 week
+-  tags:
+-    - docker
+-  timeout: 5m
++
++# --- end of removed compile / test / stash jobs
+@@
+-docker_build_push:
++docker_build_push:
+   stage: docker-build
+-  image: docker:24@sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210
++  image: docker:24@sha256:<real-digest-here>
+@@
+   services:
+-    - docker:dind@sha256:abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890
++    - docker:dind@sha256:<real-digest-here>
+@@
+-publish_artifacts:
++publish_artifacts:
+   stage: publish
+   image: curlimages/curl@sha256:<real-digest-here>
+-  needs:
+-    - job: stash_artifacts
+-      artifacts: true
++  needs: [ build_test ]
+@@
+-deploy_k8s:
++deploy_k8s:
+   stage: deploy
+   image: bitnami/kubectl:latest@sha256:<real-digest-here>
+@@
+   script:
+@@
++  environment:
++    name: "$ENV"
++    url: "https://$ENV.example.com"
++  resource_group: jenkins-scanner-prod
++
+@@
+ e2e_tests:
+   stage: e2e
+-  image: cypress/included:12.17.1@sha256:4567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234
++  image: cypress/included:12.17.1@sha256:<real-digest-here>
+@@
+-security_scan:
++security_scan:
+   stage: test
+-  image: aquasec/trivy:latest@sha256:9876543210fedcba9876543210fedcba9876543210fedcba9876543210fedcba
++  image: aquasec/trivy:latest@sha256:<real-digest-here>
+@@
+-# Post-build Notifications
+-success_notification:
+-failure_notification:
+-  (entire jobs removed, handled by Slack template)
+-
++# Post-build cleanup only (Slack handled by template)
+@@

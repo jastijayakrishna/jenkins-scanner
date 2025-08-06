@@ -1,0 +1,45 @@
+# Test Template - DRY principle (Block 10)
+# Reusable test configuration for comprehensive testing
+
+.test_template: &test_template
+  stage: test
+  cache:
+    - key: "node-$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
+      paths:
+        - node_modules/
+      policy: pull
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        compare_to: refs/heads/main
+        paths:
+          - "**/*.{js,ts,tsx,json,yml,yaml}"
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+.e2e_template: &e2e_template
+  <<: *test_template
+  parallel: 2
+  image: cypress/browsers:node18.16.0-chrome114.0.5735.133-1-ff114.0.2-edge114.0.1823.51-1@sha256:8c0f8b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6
+  script:
+    - npm ci --prefer-offline --no-audit
+    - npm run test:e2e -- --record --parallel --ci-build-id $CI_PIPELINE_ID
+  artifacts:
+    paths:
+      - cypress/screenshots/
+      - cypress/videos/
+      - cypress/reports/
+    reports:
+      junit: cypress/reports/junit/*.xml
+    expire_in: 7 days
+    when: on_failure
+
+.lint_template: &lint_template
+  <<: *test_template
+  script:
+    - npm ci --prefer-offline --no-audit
+    - npm run lint -- --format=gitlab
+    - npm run type-check
+  artifacts:
+    reports:
+      codequality: codequality.json

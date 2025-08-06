@@ -1,7 +1,8 @@
-import { convertToGitLabCI, validateGitLabCI } from '@/lib/gitlab-converter'
+// Updated to test the unified AI migration system
+import { UnifiedAIMigrationSystem } from '@/lib/ai-migration-system'
 import { ScanResult } from '@/types'
 
-describe('GitLab Converter', () => {
+describe('Unified AI Migration System', () => {
   const mockScanResult: ScanResult = {
     pluginHits: [
       { key: 'maven', name: 'Maven', category: 'build' },
@@ -49,100 +50,93 @@ pipeline {
 }
 `
 
-  describe('convertToGitLabCI', () => {
-    it('should convert a simple Jenkins pipeline to GitLab CI', () => {
-      const yaml = convertToGitLabCI(mockScanResult, mockJenkinsContent)
-      
-      expect(yaml).toContain('stages:')
-      expect(yaml).toContain('build')
-      expect(yaml).toContain('test')
-      expect(yaml).toContain('quality')
-      expect(yaml).toContain('deploy')
+  describe('migrate', () => {
+    let migrationSystem: UnifiedAIMigrationSystem
+
+    beforeEach(() => {
+      migrationSystem = new UnifiedAIMigrationSystem()
     })
 
-    it('should include appropriate Docker configuration when Docker plugin is detected', () => {
-      const yaml = convertToGitLabCI(mockScanResult, mockJenkinsContent)
+    it('should migrate a Jenkins pipeline to GitLab CI', async () => {
+      const result = await migrationSystem.migrate({
+        jenkinsfile: mockJenkinsContent,
+        scanResult: mockScanResult,
+        options: { useAI: true }
+      })
       
-      // When Maven is present, it takes precedence for the default image
-      // But Docker configuration should still be present for the package stage
-      expect(yaml).toContain('DOCKER_DRIVER')
-      expect(yaml).toContain('package:docker')
-      expect(yaml).toContain('docker build')
-      expect(yaml).toContain('docker push')
+      expect(result.success).toBe(true)
+      expect(result.yaml).toContain('stages:')
+      expect(result.yaml).toContain('build')
+      expect(result.insights).toBeDefined()
     })
 
-    it('should include Maven configuration when Maven plugin is detected', () => {
-      const yaml = convertToGitLabCI(mockScanResult, mockJenkinsContent)
+    it('should include AI-powered optimizations', async () => {
+      const result = await migrationSystem.migrate({
+        jenkinsfile: mockJenkinsContent,
+        scanResult: mockScanResult,
+        options: { useAI: true, aiOptimizations: true }
+      })
       
-      expect(yaml).toContain('maven:3.8-openjdk-11')
-      expect(yaml).toContain('MAVEN_OPTS')
-      expect(yaml).toContain('.m2/repository')
+      expect(result.success).toBe(true)
+      expect(result.optimizations).toBeDefined()
+      expect(result.optimizations.length).toBeGreaterThan(0)
     })
 
-    it('should include SonarQube configuration when SonarQube plugin is detected', () => {
-      const yaml = convertToGitLabCI(mockScanResult, mockJenkinsContent)
-      
-      expect(yaml).toContain('SONAR_HOST_URL')
-      expect(yaml).toContain('SONAR_TOKEN')
-      expect(yaml).toContain('sonar:sonar')
-    })
-
-    it('should generate different stages based on complexity', () => {
-      const simpleResult = { ...mockScanResult, tier: 'simple' as const }
-      const simpleYaml = convertToGitLabCI(simpleResult, mockJenkinsContent)
-      
+    it('should handle complex pipelines with AI assistance', async () => {
       const complexResult = { ...mockScanResult, tier: 'complex' as const }
-      const complexYaml = convertToGitLabCI(complexResult, mockJenkinsContent)
       
-      // Simple should have fewer stages
-      expect(simpleYaml.match(/- \w+/g)?.length).toBeLessThan(
-        complexYaml.match(/- \w+/g)?.length || 0
-      )
+      const result = await migrationSystem.migrate({
+        jenkinsfile: mockJenkinsContent,
+        scanResult: complexResult,
+        options: { useAI: true }
+      })
+      
+      expect(result.success).toBe(true)
+      expect(result.yaml).toBeTruthy()
+      expect(result.analysisReport).toBeDefined()
     })
 
-    it('should include warnings for scripted pipelines', () => {
-      const scriptedResult = { ...mockScanResult, scripted: true, declarative: false }
-      const yaml = convertToGitLabCI(scriptedResult, mockJenkinsContent)
+    it('should fallback to direct conversion for simple cases', async () => {
+      const simpleResult = { ...mockScanResult, tier: 'simple' as const }
       
-      expect(yaml).toContain('Scripted Jenkins pipeline')
-      expect(yaml).toContain('manual adjustment')
+      const result = await migrationSystem.migrate({
+        jenkinsfile: mockJenkinsContent,
+        scanResult: simpleResult,
+        options: { useAI: false }
+      })
+      
+      expect(result.success).toBe(true)
+      expect(result.yaml).toBeTruthy()
+    })
+
+    it('should provide meaningful error messages on failure', async () => {
+      const result = await migrationSystem.migrate({
+        jenkinsfile: 'invalid jenkins content',
+        scanResult: mockScanResult,
+        options: {}
+      })
+      
+      expect(result.success).toBe(false)
+      expect(result.error).toBeDefined()
     })
   })
 
-  describe('validateGitLabCI', () => {
-    it('should validate a correct GitLab CI YAML', () => {
-      const yaml = convertToGitLabCI(mockScanResult, mockJenkinsContent)
-      const validation = validateGitLabCI(yaml)
-      
-      expect(validation.valid).toBe(true)
-      expect(validation.errors).toHaveLength(0)
+  describe('validateMigrationResult', () => {
+    let migrationSystem: UnifiedAIMigrationSystem
+
+    beforeEach(() => {
+      migrationSystem = new UnifiedAIMigrationSystem()
     })
 
-    it('should detect missing stages', () => {
-      const invalidYaml = `
-variables:
-  TEST: "value"
-
-build:
-  script:
-    - echo "test"
-`
-      const validation = validateGitLabCI(invalidYaml)
+    it('should validate generated GitLab CI configuration', async () => {
+      const result = await migrationSystem.migrate({
+        jenkinsfile: mockJenkinsContent,
+        scanResult: mockScanResult,
+        options: { useAI: true }
+      })
       
-      expect(validation.valid).toBe(false)
-      expect(validation.errors).toContain('No stages defined')
-    })
-
-    it('should detect missing jobs', () => {
-      const invalidYaml = `
-stages:
-  - build
-  - test
-`
-      const validation = validateGitLabCI(invalidYaml)
-      
-      expect(validation.valid).toBe(false)
-      expect(validation.errors).toContain('No jobs defined')
+      expect(result.success).toBe(true)
+      expect(result.validationErrors).toHaveLength(0)
     })
   })
 })

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins-scanner-service
+  namespace: __NAMESPACE__
+  labels:
+    app: jenkins-scanner
+    environment: __ENVIRONMENT__
+spec:
+  selector:
+    app: jenkins-scanner
+  ports:
+  - port: 80
+    targetPort: 3000
+    protocol: TCP
+  type: ClusterIP

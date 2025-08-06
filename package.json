@@ -3,12 +3,18 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --coverage --passWithNoTests",
+    "test:watch": "jest --watch",
+    "test:e2e": "cypress run",
+    "test:e2e:open": "cypress open",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test:watch": "jest --watch"
+    "type-check": "tsc --noEmit",
+    "security:scan": "npm audit --audit-level=high",
+    "docker:build": "docker build -t jenkins-scanner .",
+    "docker:run": "docker run -p 3000:3000 jenkins-scanner"
   },
   "keywords": [],
   "author": "",

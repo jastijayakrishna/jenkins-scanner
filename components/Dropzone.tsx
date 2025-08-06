@@ -70,42 +70,31 @@ export default function Dropzone({ onScan }: DropzoneProps) {
     [onScan],
   );
 
-  const { getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject, open } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject } = useDropzone({
     onDrop,
-    // Accept common text file types - allow all files for flexibility
-    accept: undefined,
+    accept: {
+      'text/plain': ['.txt'],
+      'application/x-groovy': ['.groovy'],
+      'text/x-groovy': ['.groovy'],
+      '': ['Jenkinsfile', 'jenkinsfile']
+    },
     maxFiles: 1,
     maxSize: 2 * 1024 * 1024, // 2MB
     disabled: false,
     noClick: false,
     noKeyboard: false,
-    onDragEnter: () => console.log('Drag enter'),
-    onDragLeave: () => console.log('Drag leave'),
-    onDragOver: () => console.log('Drag over'),
-    onDropAccepted: (files) => console.log('Files accepted:', files.length),
-    onDropRejected: (rejections) => console.log('Files rejected:', rejections.length),
   });
+
+  const handleBrowseClick = () => {
+    console.log('Browse button clicked - triggering file input');
+    if (inputRef.current) {
+      inputRef.current.click();
+    }
+  };
 
   return (
     <div
-      {...getRootProps({
-        role: 'button',
-        tabIndex: 0,
-        'aria-label': 'Upload Jenkinsfile',
-        onClick: (e: React.MouseEvent) => {
-          // Ensure click opens file dialog
-          e.preventDefault();
-          e.stopPropagation();
-          console.log('Dropzone clicked - opening file dialog');
-          open();
-        },
-        onKeyDown: (e: React.KeyboardEvent) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            open();
-          }
-        },
-      })}
+      {...getRootProps()}
       className={`
         group relative mx-auto flex max-w-xl flex-col items-center
         justify-center rounded-3xl border-2 border-dashed p-12 text-center
@@ -159,12 +148,7 @@ export default function Dropzone({ onScan }: DropzoneProps) {
           </p>
           <button
             type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              console.log('Browse button clicked');
-              open();
-            }}
+            onClick={handleBrowseClick}
             className="mt-4 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg 
                      text-sm font-medium transition-colors focus:outline-none focus:ring-2 
                      focus:ring-brand-500 focus:ring-offset-2"

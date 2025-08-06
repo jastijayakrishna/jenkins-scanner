@@ -25,8 +25,37 @@ variables:
 
 default:
   image: maven:3.9-eclipse-temurin-17@sha256:ff02cc25f01fa456a927ff38aab1fb9d2e74fe81fcf1457a58bf9306f2dc8472
+  interruptible: true
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
   before_script:
     - echo "Pipeline started for $CI_COMMIT_REF_NAME"
+
+# Reusable job configurations
+.node_job: &node_job
+  image: node:18-alpine@sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35cb9bc4b8ca09d9e
+  cache:
+    key: 
+      files:
+        - package-lock.json
+    paths:
+      - node_modules/
+  before_script:
+    - npm ci
+
+.docker_job: &docker_job
+  image: docker:24@sha256:9b17a9f25adf17b88d0a013b4f00160754adf4b07ccbe9986664a49886c2c98e
+  services:
+    - name: docker:24-dind@sha256:9b17a9f25adf17b88d0a013b4f00160754adf4b07ccbe9986664a49886c2c98e
+      command: ['--tls=false']
+  privileged: true
+  variables:
+    DOCKER_HOST: tcp://docker:2375/
+    DOCKER_BUILDKIT: 1
+    BUILDKIT_PROGRESS: plain
 
 cache:
   - key: 
@@ -42,7 +71,8 @@ cache:
 # PREPARE STAGE
 prepare:
   stage: prepare
-  image: hadolint/hadolint@sha256:4d5372075a21d16931537849a97467cdc9ca0640e14656f706839cd863189ba0
+  image: hadolint/hadolint:latest
+  # To get real digest: docker inspect --format='{{index .RepoDigests 0}}' hadolint/hadolint:latest
   script:
     - hadolint Dockerfile || echo "Dockerfile linting completed"
     - echo "YAML linting completed"
@@ -51,11 +81,29 @@ prepare:
     - if: $CI_COMMIT_BRANCH == "main"
     - if: $CI_COMMIT_BRANCH == "develop"
 
+validate:ci:
+  stage: prepare
+  image: curlimages/curl@sha256:4026b29997dc7c823b51c164b71e2b51e0fd95cce4601f78202c513d97da2922
+  script:
+    - |
+      curl --header "PRIVATE-TOKEN: $CI_JOB_TOKEN" \
+           --header "Content-Type: application/json" \
+           --data "{\"content\": \"$(cat .gitlab-ci.yml | base64 -w 0)\"}" \
+           "$CI_API_V4_URL/projects/$CI_PROJECT_ID/ci/lint" | jq '.valid'
+    - echo "✅ GitLab CI configuration is valid"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - .gitlab-ci.yml
+    - if: $CI_COMMIT_BRANCH == "main"
+      changes:
+        - .gitlab-ci.yml
+
 # BUILD STAGE
 build:app:
+  extends: .node_job
   stage: build
   script:
-    - npm ci
     - npm run build
   artifacts:
     paths:
@@ -69,16 +117,20 @@ build:app:
 
 # TEST STAGE
 test:unit:
+  extends: .node_job
   stage: test
   script:
-    - npm ci
-    - npm test
+    - npm test -- --coverage --watchAll=false --reporters=default --reporters=jest-junit
   artifacts:
     reports:
       junit: junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
     paths:
       - coverage/
     expire_in: 7 days
+  coverage: '/Lines\s*:\s*(\d+\.\d+)%/'
   needs: ["build:app"]
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -90,9 +142,9 @@ test:unit:
     - if: $CI_COMMIT_BRANCH == "develop"
 
 test:e2e:
+  extends: .node_job
   stage: test
   script:
-    - npm ci
     - npm run test:e2e
   artifacts:
     paths:
@@ -111,9 +163,9 @@ test:e2e:
     - if: $CI_COMMIT_BRANCH == "develop"
 
 test:lint:
+  extends: .node_job
   stage: test
   script:
-    - npm ci
     - npm run lint
     - npm run type-check
   needs: ["build:app"]
@@ -132,7 +184,8 @@ test:lint:
 # QUALITY STAGE
 quality:sonar:
   stage: quality
-  image: sonarqube/sonar-scanner-cli@sha256:2c3c7b5a8b1e5f4d3a2b9c8e7f6a5d4c3b2a1e9f8d7c6b5a4e3d2c1b0a9f8e7d
+  image: sonarqube/sonar-scanner-cli:latest
+  # To get real digest: docker inspect --format='{{index .RepoDigests 0}}' sonarqube/sonar-scanner-cli:latest
   script:
     - sonar-scanner -Dsonar.token=$SONAR_TOKEN_MASKED
   needs: ["test:unit"]
@@ -164,7 +217,8 @@ scan:trivy:
 
 scan:deps:
   stage: security
-  image: anchore/grype@sha256:1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u2v3w4x5y6z7a8b9c0d1e2f
+  image: anchore/grype:latest
+  # To get real digest: docker inspect --format='{{index .RepoDigests 0}}' anchore/grype:latest
   script:
     - grype package.json --fail-on high --output json --file grype-npm-report.json
     - grype package-lock.json --fail-on high --output json --file grype-lock-report.json
@@ -181,20 +235,16 @@ scan:deps:
 
 # PACKAGE STAGE  
 package:docker:
+  extends: .docker_job
   stage: package
-  image: docker:24@sha256:9b17a9f25adf17b88d0a013b4f00160754adf4b07ccbe9986664a49886c2c98e
-  services:
-    - name: docker:24-dind@sha256:9b17a9f25adf17b88d0a013b4f00160754adf4b07ccbe9986664a49886c2c98e
-  privileged: true
-  variables:
-    DOCKER_HOST: tcp://docker:2375/
   before_script:
     - echo "$CI_JOB_TOKEN" | docker login $CI_REGISTRY --username $CI_REGISTRY_USER --password-stdin
   script:
-    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .
+    - docker build --build-arg BUILDKIT_INLINE_CACHE=1 -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .
     - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE:latest
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
     - docker push $CI_REGISTRY_IMAGE:latest
+    - echo "Image digest:" && docker inspect --format='{{index .RepoDigests 0}}' $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
   needs: ["quality:sonar"]
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -225,6 +275,8 @@ review:
     name: review/$CI_MERGE_REQUEST_IID
     url: https://mr-$CI_MERGE_REQUEST_IID.jenkins-scanner-review.example.com
     on_stop: stop_review
+    auto_stop_in: 1 week
+  resource_group: review-apps
   needs: ["package:docker"]
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -276,13 +328,8 @@ pages:
 
 # CLEANUP STAGE
 cleanup:
+  extends: .docker_job
   stage: cleanup
-  image: docker:24@sha256:9b17a9f25adf17b88d0a013b4f00160754adf4b07ccbe9986664a49886c2c98e
-  services:
-    - name: docker:24-dind@sha256:9b17a9f25adf17b88d0a013b4f00160754adf4b07ccbe9986664a49886c2c98e
-  privileged: true
-  variables:
-    DOCKER_HOST: tcp://docker:2375/
   script:
     - docker system prune -af --volumes
     - rm -rf node_modules/

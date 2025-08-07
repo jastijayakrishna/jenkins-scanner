@@ -46,8 +46,8 @@ class MonitoringService {
     if (process.env.NODE_ENV === 'production') {
       // TODO: Send to Sentry, Rollbar, etc.
       console.error('Error tracked:', {
-        message: error.message,
-        stack: error.stack,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
         context
       })
     }

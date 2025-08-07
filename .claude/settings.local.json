@@ -31,7 +31,14 @@
       "Bash(git restore:*)",
       "Bash(mv:*)",
       "Bash(git tag:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(npm install)",
+      "Bash(npm run type-check:*)",
+      "Bash(timeout 8s npm run dev)",
+      "Bash(npm cache clean:*)",
+      "Bash(timeout 8s npx next dev --turbo)",
+      "Bash(timeout 8s npm start)",
+      "Bash(powershell:*)"
     ],
     "deny": []
   }

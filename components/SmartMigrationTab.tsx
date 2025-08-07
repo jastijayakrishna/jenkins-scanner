@@ -298,7 +298,12 @@ export default function SmartMigrationTab({
 
               {/* Key Insights */}
               <div className="rounded-3xl glass-card p-8" style={{ borderColor: 'var(--border-primary)' }}>
-                <h3 className="text-2xl font-bold mb-6 flex items-center gap-3" style={{ color: 'var(--text-primary)' }}>
+                <h3 className="text-2xl font-bold mb-6 flex items-center gap-3" style={{ 
+                  color: 'var(--text-primary)',
+                  fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif',
+                  fontWeight: 590,
+                  letterSpacing: '-0.022em'
+                }}>
                   <Brain className="w-7 h-7" style={{ color: 'var(--accent-primary)' }} />
                   Key Insights
                 </h3>
@@ -313,7 +318,13 @@ export default function SmartMigrationTab({
                       <div className="w-6 h-6 rounded-full bg-gradient-to-r from-green-400 to-green-500 flex items-center justify-center mt-0.5 group-hover:scale-110 transition-transform duration-200" style={{ backgroundColor: 'var(--accent-success)' }}>
                         <CheckCircle className="w-4 h-4 text-white" />
                       </div>
-                      <span className="transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>{insight}</span>
+                      <span className="transition-colors duration-200" style={{ 
+                        color: 'var(--text-primary)',
+                        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif',
+                        fontWeight: 400,
+                        letterSpacing: '-0.022em',
+                        lineHeight: 1.47058823529
+                      }}>{insight}</span>
                     </div>
                   ))}
                 </div>

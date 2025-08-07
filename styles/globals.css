@@ -2,9 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Apple-inspired design system with SF colors and typography */
+/* Professional design system with modern typography and interaction patterns */
 :root {
-  /* Apple System Colors */
+  /* System Color Palette */
   --system-blue: #007AFF;
   --system-blue-light: rgba(0, 122, 255, 0.1);
   --system-gray: #8E8E93;
@@ -25,8 +25,8 @@
   --border-secondary: var(--system-gray3);
   --border-focus: var(--system-blue);
   
-  --text-primary: #1D1D1F;    /* Apple's primary text */
-  --text-secondary: #86868B;  /* Apple's secondary text */
+  --text-primary: #1D1D1F;    /* Primary text color */
+  --text-secondary: #86868B;  /* Secondary text color */
   --text-muted: var(--system-gray);
   --text-link: var(--system-blue);
   
@@ -36,18 +36,18 @@
   --accent-warning: #FF9500;
   --accent-error: #FF3B30;
   
-  /* Apple-style glass morphism */
+  /* Glass morphism effects */
   --glass-bg: rgba(255, 255, 255, 0.8);
   --glass-border: rgba(255, 255, 255, 0.2);
   --glass-backdrop: blur(20px) saturate(1.8);
   
-  /* Apple shadow system */
+  /* Shadow system */
   --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.1);
   --shadow-2: 0 4px 6px rgba(0, 0, 0, 0.07);
   --shadow-3: 0 10px 15px rgba(0, 0, 0, 0.1);
   --shadow-4: 0 25px 50px rgba(0, 0, 0, 0.15);
   
-  /* Apple spacing scale (4pt grid) */
+  /* Spacing scale (4pt grid system) */
   --spacing-1: 0.25rem; /* 4px */
   --spacing-2: 0.5rem;  /* 8px */
   --spacing-3: 0.75rem; /* 12px */
@@ -58,7 +58,7 @@
   --spacing-10: 2.5rem; /* 40px */
   --spacing-12: 3rem;   /* 48px */
   
-  /* Apple motion timing */
+  /* Motion timing curves */
   --easing-standard: cubic-bezier(0.4, 0.0, 0.2, 1);
   --easing-decelerate: cubic-bezier(0.0, 0.0, 0.2, 1);
   --easing-accelerate: cubic-bezier(0.4, 0.0, 1, 1);
@@ -78,11 +78,11 @@ html, body {
   color: var(--text-primary);
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
   font-weight: 400;
-  line-height: 1.47058823529; /* Apple's golden ratio */
+  line-height: 1.47058823529; /* Optimal line height ratio */
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  letter-spacing: -0.022em; /* Apple's system font tracking */
+  letter-spacing: -0.022em; /* System font letter spacing */
 }
 
 /* Light scrollbar styling */
@@ -104,12 +104,12 @@ html, body {
   background: #94a3b8;
 }
 
-/* Apple-style card system with glass morphism */
+/* Modern card system with glass morphism effects */
 .glass-card {
   background: var(--glass-bg);
   backdrop-filter: var(--glass-backdrop);
   border: 1px solid var(--glass-border);
-  border-radius: 16px; /* Apple's large corner radius */
+  border-radius: 16px; /* Large corner radius for cards */
   box-shadow: var(--shadow-2);
   transition: all var(--duration-medium) var(--easing-standard);
 }
@@ -133,7 +133,7 @@ html, body {
   transform: translateY(-2px) scale(1.01);
 }
 
-/* Apple-style focus states */
+/* Enhanced focus states for accessibility */
 .modern-card:focus-within {
   border-color: var(--border-focus);
   box-shadow: 0 0 0 4px var(--system-blue-light), var(--shadow-3);
@@ -161,7 +161,7 @@ html, body {
   left: 100%;
 }
 
-/* Apple-style link highlighting */
+/* Professional link styling with hover states */
 a {
   color: var(--text-link);
   text-decoration: none;
@@ -181,7 +181,7 @@ a:focus {
   border-radius: 4px;
 }
 
-/* Apple-style button focus states */
+/* Button focus states for accessibility */
 .btn-primary:focus,
 .btn-secondary:focus,
 .btn-error:focus {
@@ -243,7 +243,7 @@ a:focus {
 }
 .animate-fade-in-slow { animation: fade-in-slow 0.4s forwards; }
 
-/* Apple-style animations with proper easing */
+/* Smooth animations with professional easing curves */
 @keyframes fade-in {
   from { 
     opacity: 0;
@@ -272,7 +272,7 @@ a:focus {
   animation: slide-up var(--duration-long) var(--easing-decelerate);
 }
 
-@keyframes apple-glow {
+@keyframes system-glow {
   0%, 100% { 
     box-shadow: 0 0 0 0 var(--system-blue-light), var(--shadow-2);
   }
@@ -281,18 +281,18 @@ a:focus {
   }
 }
 .animate-glow { 
-  animation: apple-glow 2s var(--easing-standard) infinite;
+  animation: system-glow 2s var(--easing-standard) infinite;
 }
 
-@keyframes apple-bounce {
+@keyframes subtle-bounce {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.05); }
 }
 .animate-bounce-subtle { 
-  animation: apple-bounce 0.6s var(--easing-standard);
+  animation: subtle-bounce 0.6s var(--easing-standard);
 }
 
-/* Apple-style button system */
+/* Professional button system with consistent styling */
 .btn-primary {
   background: var(--accent-primary);
   color: white;
@@ -302,7 +302,7 @@ a:focus {
   line-height: 1.23529;
   letter-spacing: -0.022em;
   padding: var(--spacing-3) var(--spacing-6);
-  border-radius: 10px; /* Apple's standard corner radius */
+  border-radius: 10px; /* Standard button corner radius */
   border: none;
   box-shadow: var(--shadow-2);
   transition: all var(--duration-medium) var(--easing-standard);
@@ -378,7 +378,7 @@ a:focus {
   transition-duration: var(--duration-short);
 }
 
-/* Apple-style code blocks */
+/* Code block styling with monospace font */
 pre {
   font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
   font-size: 13px;
@@ -421,7 +421,7 @@ pre::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.3);
 }
 
-/* Apple-style form controls */
+/* Form controls with consistent styling */
 input, textarea, select {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
   font-size: 17px;
@@ -446,7 +446,7 @@ input:hover, textarea:hover, select:hover {
   border-color: var(--border-secondary);
 }
 
-/* Apple-style placeholder */
+/* Input placeholder styling */
 input::placeholder, textarea::placeholder {
   color: var(--text-secondary);
   opacity: 1;
@@ -458,7 +458,7 @@ input::placeholder, textarea::placeholder {
   backdrop-filter: blur(4px);
 }
 
-/* Apple-style dropzone with enhanced focus states */
+/* File dropzone with enhanced accessibility */
 .dropzone-active {
   border-color: var(--border-focus);
   background: var(--system-blue-light);
@@ -489,7 +489,7 @@ input::placeholder, textarea::placeholder {
   transform: translateY(-2px) scale(1.01);
 }
 
-/* Apple-style selection highlights */
+/* Text selection styling */
 ::selection {
   background: var(--system-blue-light);
   color: var(--text-primary);
@@ -509,7 +509,7 @@ input::placeholder, textarea::placeholder {
   @apply bg-gradient-to-r from-blue-500 to-blue-600 h-full transition-all duration-300;
 }
 
-/* Apple-style card hover effects */
+/* Card hover effects with smooth transitions */
 .card-hover {
   transition: all var(--duration-medium) var(--easing-standard);
 }
@@ -525,7 +525,7 @@ input::placeholder, textarea::placeholder {
   transition-duration: var(--duration-short);
 }
 
-/* Apple system status indicators */
+/* Status indicators with semantic colors */
 .status-success {
   background: rgba(48, 209, 88, 0.1);
   color: var(--accent-success);

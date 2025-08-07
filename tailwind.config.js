@@ -30,26 +30,26 @@ module.exports = {
           950: '#0a0a0a',
         },
         
-        // Apple System Blue palette
+        // Primary brand color palette
         brand: {
-          50: '#F2F2F7',   // Apple System Gray 6
-          100: '#E5E5EA',  // Apple System Gray 5
-          200: '#D1D1D6',  // Apple System Gray 4
-          300: '#C7C7CC',  // Apple System Gray 3
-          400: '#AEAEB2',  // Apple System Gray 2
-          500: '#007AFF',  // Apple System Blue
-          600: '#0051D5',  // Apple System Blue Dark
+          50: '#F2F2F7',   // System Gray 6
+          100: '#E5E5EA',  // System Gray 5
+          200: '#D1D1D6',  // System Gray 4
+          300: '#C7C7CC',  // System Gray 3
+          400: '#AEAEB2',  // System Gray 2
+          500: '#007AFF',  // System Blue
+          600: '#0051D5',  // System Blue Dark
           700: '#003D99',  // Deeper blue
           800: '#002E73',  // Dark blue
           900: '#001F4D',  // Very dark blue
           950: '#00122E',  // Navy blue
         },
 
-        // Apple System Colors for feedback
+        // Semantic colors for system feedback
         accent: {
           success: {
             50: '#F0FDF4',
-            500: '#30D158',  // Apple System Green
+            500: '#30D158',  // System Green
             600: '#248A3D',
             700: '#1E6F32',
             800: '#185429',
@@ -57,7 +57,7 @@ module.exports = {
           },
           warning: {
             50: '#FFFBEB',
-            500: '#FF9500',  // Apple System Orange
+            500: '#FF9500',  // System Orange
             600: '#E6850E',
             700: '#CC7A00',
             800: '#B36B00',
@@ -65,7 +65,7 @@ module.exports = {
           },
           error: {
             50: '#FEF2F2',
-            500: '#FF3B30',  // Apple System Red
+            500: '#FF3B30',  // System Red
             600: '#D70015',
             700: '#B80012',
             800: '#99000F',
@@ -90,12 +90,12 @@ module.exports = {
           '33%': { transform: 'translate(30px,-50px) scale(1.1)' },
           '66%': { transform: 'translate(-20px,20px) scale(0.9)' },
         },
-        // Apple-style fade with slight movement
+        // Fade animation with subtle movement
         'fade-in': {
           from: { opacity: 0, transform: 'translateY(8px)' },
           to: { opacity: 1, transform: 'translateY(0)' },
         },
-        // iOS-style slide up animation
+        // Slide up animation with scaling
         'slide-up': {
           from: { opacity: 0, transform: 'translateY(24px) scale(0.96)' },
           to: { opacity: 1, transform: 'translateY(0) scale(1)' },
@@ -104,13 +104,13 @@ module.exports = {
           from: { opacity: 0, transform: 'translateY(-24px) scale(0.96)' },
           to: { opacity: 1, transform: 'translateY(0) scale(1)' },
         },
-        // Apple-style scale in
+        // Scale in animation
         'scale-in': {
           from: { opacity: 0, transform: 'scale(0.92)' },
           to: { opacity: 1, transform: 'scale(1)' },
         },
-        // Apple-style bounce
-        'apple-bounce': {
+        // Subtle bounce animation
+        'subtle-bounce': {
           '0%, 100%': { transform: 'scale(1)' },
           '50%': { transform: 'scale(1.05)' },
         },
@@ -140,12 +140,12 @@ module.exports = {
       
       animation: {
         blob: 'blob 18s ease-in-out infinite',
-        // Apple timing curves (cubic-bezier(0.4, 0.0, 0.2, 1))
+        // Professional timing curves with easing
         'fade-in': 'fade-in 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) forwards',
         'slide-up': 'slide-up 0.5s cubic-bezier(0.0, 0.0, 0.2, 1) forwards',
         'slide-down': 'slide-down 0.5s cubic-bezier(0.0, 0.0, 0.2, 1) forwards',
         'scale-in': 'scale-in 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) forwards',
-        'apple-bounce': 'apple-bounce 0.6s cubic-bezier(0.4, 0.0, 0.2, 1)',
+        'subtle-bounce': 'subtle-bounce 0.6s cubic-bezier(0.4, 0.0, 0.2, 1)',
         glow: 'glow 2s cubic-bezier(0.4, 0.0, 0.2, 1) infinite',
         'pulse-glow': 'pulse-glow 2s cubic-bezier(0.4, 0.0, 0.2, 1) infinite',
         float: 'float 3s cubic-bezier(0.4, 0.0, 0.2, 1) infinite',
@@ -177,12 +177,12 @@ module.exports = {
         '5xl': '2.5rem',
       },
 
-      // Apple's 4pt spacing grid
+      // 4pt spacing grid system
       spacing: {
         '18': '4.5rem',
         '88': '22rem',
         '128': '32rem',
-        // Apple specific spacings
+        // Custom spacing values
         '1.5': '0.375rem', // 6px
         '2.5': '0.625rem', // 10px
         '3.5': '0.875rem', // 14px
@@ -192,7 +192,7 @@ module.exports = {
         '7.5': '1.875rem', // 30px
       },
 
-      // Apple Typography Scale
+      // Professional typography scale
       fontSize: {
         '2xs': ['0.625rem', { lineHeight: '0.75rem' }],
         // SF Pro Display sizes
@@ -235,7 +235,7 @@ module.exports = {
   ],
 
   plugins: [
-    // Custom scrollbar and Apple-level utilities plugin
+    // Custom scrollbar and utility plugin
     function({ addUtilities }) {
       addUtilities({
         '.scrollbar-hide': {

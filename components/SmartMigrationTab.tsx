@@ -1,6 +1,10 @@
 /**
- * Smart Migration Tab - Apple-level UI Design
- * Premium interface with unified design system and optimized performance
+ * SmartMigrationTab Component
+ * 
+ * Advanced migration interface providing AI-powered analysis, GitLab CI generation,
+ * and credential mapping with comprehensive reporting capabilities.
+ * 
+ * @component
  */
 
 import React, { useState, useEffect, useMemo } from 'react'

@@ -29,7 +29,9 @@
       "Bash(cp:*)",
       "Bash(chmod:*)",
       "Bash(git restore:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(git tag:*)",
+      "Bash(git reset:*)"
     ],
     "deny": []
   }

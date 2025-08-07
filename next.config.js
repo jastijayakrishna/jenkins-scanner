@@ -20,6 +20,16 @@ const nextConfig = {
         ...config.watchOptions,
         followSymlinks: false,
       }
+      // Fix webpack cache issues on Windows
+      if (process.platform === 'win32') {
+        config.cache = {
+          type: 'filesystem',
+          allowCollectingMemory: true,
+          buildDependencies: {
+            config: [__filename],
+          },
+        }
+      }
     }
     return config
   },

@@ -30,46 +30,46 @@ module.exports = {
           950: '#0a0a0a',
         },
         
-        // Enhanced brand colors for dark theme
+        // Clean blue palette for modern white and blue theme
         brand: {
-          50: '#eff6ff',
-          100: '#dbeafe', 
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',  // Primary blue
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
-          950: '#172554',
+          50: '#f8fafc',   // Pure white with minimal blue tint
+          100: '#f1f5f9',  // Very light blue-grey
+          200: '#e2e8f0',  // Light blue-grey
+          300: '#cbd5e1',  // Medium blue-grey
+          400: '#94a3b8',  // Muted blue-grey
+          500: '#3b82f6',  // Clean modern blue
+          600: '#2563eb',  // Primary blue
+          700: '#1d4ed8',  // Deep blue
+          800: '#1e40af',  // Darker blue
+          900: '#1e3a8a',  // Very dark blue
+          950: '#172554',  // Navy blue
         },
 
-        // Dark-themed accent colors
+        // Apple-inspired accent colors for system feedback
         accent: {
           success: {
             50: '#ecfdf5',
-            500: '#10b981',
-            600: '#059669',
-            700: '#047857',
-            800: '#065f46',
-            900: '#064e3b',
+            500: '#34c759',  // Apple green
+            600: '#28a745',
+            700: '#20a745',
+            800: '#168f39',
+            900: '#0e722d',
           },
           warning: {
             50: '#fffbeb',
-            500: '#f59e0b',
-            600: '#d97706',
-            700: '#b45309',
-            800: '#92400e',
-            900: '#78350f',
+            500: '#ff9500',  // Apple orange
+            600: '#e6850e',
+            700: '#cc7a00',
+            800: '#b36b00',
+            900: '#995c00',
           },
           error: {
             50: '#fef2f2',
-            500: '#ef4444',
-            600: '#dc2626',
-            700: '#b91c1c',
-            800: '#991b1b',
-            900: '#7f1d1d',
+            500: '#ff3b30',  // Apple red
+            600: '#e6342a',
+            700: '#cc2e24',
+            800: '#b3281e',
+            900: '#992218',
           },
         },
 
@@ -203,5 +203,39 @@ module.exports = {
     'blob-cyan',
   ],
 
-  plugins: [],
+  plugins: [
+    // Custom scrollbar and Apple-level utilities plugin
+    function({ addUtilities }) {
+      addUtilities({
+        '.scrollbar-hide': {
+          '-ms-overflow-style': 'none',
+          'scrollbar-width': 'none',
+          '&::-webkit-scrollbar': {
+            display: 'none'
+          }
+        },
+        '.scrollbar-thin': {
+          'scrollbar-width': 'thin',
+          '&::-webkit-scrollbar': {
+            width: '6px',
+            height: '6px'
+          }
+        },
+        '.scrollbar-thumb-white\\/20': {
+          '&::-webkit-scrollbar-thumb': {
+            'background-color': 'rgba(255, 255, 255, 0.2)',
+            'border-radius': '3px'
+          }
+        },
+        '.scrollbar-track-transparent': {
+          '&::-webkit-scrollbar-track': {
+            'background-color': 'transparent'
+          }
+        },
+        '.shadow-glow': {
+          'box-shadow': '0 0 20px rgba(59, 130, 246, 0.4)'
+        }
+      })
+    }
+  ],
 }

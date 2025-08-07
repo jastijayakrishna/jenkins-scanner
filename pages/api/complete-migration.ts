@@ -4,7 +4,7 @@
  */
 
 import { NextApiRequest, NextApiResponse } from 'next'
-import { aiMigrationSystem, MigrationContext, MigrationResult } from '@/lib/ai-migration-system'
+import { enterpriseAIMigrationSystem, MigrationContext, MigrationResult } from '@/lib/ai-migration-system-simple'
 import { productionMigrationEngine } from '@/lib/production-migration-engine'
 import { ScanResult } from '@/types'
 
@@ -130,7 +130,7 @@ export default async function handler(
         success: true
       }
     } else {
-      migrationResult = await aiMigrationSystem.migrate(migrationContext)
+      migrationResult = await enterpriseAIMigrationSystem.migrate(migrationContext)
     }
 
     const totalTime = Date.now() - startTime
@@ -143,12 +143,12 @@ export default async function handler(
       gitlabYaml: migrationResult.gitlabYaml,
       conversionReport: {
         totalPlugins: migrationResult.intelligence.plugins.length,
-        convertedPlugins: migrationResult.intelligence.plugins.filter(p => p.conversionType !== 'manual').length,
+        convertedPlugins: migrationResult.intelligence.plugins.filter((p: any) => p.conversionType !== 'manual').length,
         aiAssistedConversions: migrationResult.intelligence.summary.aiDecisions,
-        manualReviewRequired: migrationResult.intelligence.plugins.filter(p => p.conversionType === 'manual').length,
+        manualReviewRequired: migrationResult.intelligence.plugins.filter((p: any) => p.conversionType === 'manual').length,
         conversionDetails: migrationResult.intelligence.plugins,
-        performanceOptimizations: migrationResult.intelligence.optimizations.filter(o => o.type === 'performance').map(o => o.description),
-        securityEnhancements: migrationResult.intelligence.optimizations.filter(o => o.type === 'security').map(o => o.description)
+        performanceOptimizations: migrationResult.intelligence.optimizations.filter((o: any) => o.type === 'performance').map((o: any) => o.description),
+        securityEnhancements: migrationResult.intelligence.optimizations.filter((o: any) => o.type === 'security').map((o: any) => o.description)
       },
       migrationInstructions: [
         'Copy the generated .gitlab-ci.yml to your repository root',
@@ -158,7 +158,7 @@ export default async function handler(
         'Monitor the first few pipeline runs for optimization opportunities'
       ],
       warnings: migrationResult.intelligence.pipeline.migration.risks,
-      requiresManualReview: migrationResult.intelligence.plugins.filter(p => p.conversionType === 'manual').map(p => p.original),
+      requiresManualReview: migrationResult.intelligence.plugins.filter((p: any) => p.conversionType === 'manual').map((p: any) => p.original),
       estimatedEffort: migrationResult.intelligence.estimatedEffort,
       intelligence: migrationResult.intelligence,
       performanceMetrics: migrationResult.performanceMetrics || {},

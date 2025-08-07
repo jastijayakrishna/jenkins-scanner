@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { scan } from '@/lib/score'
-import { aiMigrationSystem } from '@/lib/ai-migration-system'
 import { ConversionResult } from '@/types'
+import { enterpriseAIMigrationSystem } from '@/lib/ai-migration-system-simple'
 
 // Security: Max file size limit (2MB)
 const MAX_FILE_SIZE = 2 * 1024 * 1024
@@ -97,42 +97,28 @@ export default async function handler(
       })
     }
     
-    // Convert using unified AI system
-    let migrationResult
-    try {
-      migrationResult = await aiMigrationSystem.migrate({
-        jenkinsfile: content,
-        scanResult,
-        options: {
-          targetComplexity: 'balanced',
-          optimizeForSpeed: true,
-          includeSecurityScanning: true,
-          enableParallelization: true
-        }
-      })
-    } catch (conversionError) {
-      console.error('AI Migration error:', conversionError)
-      return res.status(500).json({ 
-        error: 'Failed to convert Jenkins pipeline to GitLab CI',
-        details: process.env.NODE_ENV === 'development' ? (conversionError as Error).message : undefined
-      })
-    }
-    
-    // Simple validation
-    const validationResult = {
-      valid: migrationResult.success && migrationResult.gitlabYaml.includes('stages:'),
-      errors: migrationResult.success ? [] : ['Conversion did not complete successfully']
-    }
+    // Use AI migration system for conversion
+    const migrationResult = await enterpriseAIMigrationSystem.migrate({
+      jenkinsfile: content,
+      scanResult,
+      options: {
+        targetComplexity: 'balanced',
+        optimizeForSpeed: true,
+        includeSecurityScanning: true,
+        enableParallelization: true,
+        generateDocumentation: false
+      }
+    })
     
     const conversionResult: ConversionResult = {
       yaml: migrationResult.gitlabYaml,
       scanResult,
-      validationErrors: validationResult.errors,
-      success: validationResult.valid
+      validationErrors: migrationResult.success ? [] : ['Migration failed'],
+      success: migrationResult.success
     }
     
     // Log successful conversion (for monitoring)
-    console.log(`[CONVERT] Success - IP: ${getRateLimitKey(req)}, Complexity: ${scanResult.tier}, Valid: ${validationResult.valid}`)
+    console.log(`[CONVERT] Success - IP: ${getRateLimitKey(req)}, Complexity: ${scanResult.tier}, Valid: ${migrationResult.success}`)
     
     res.status(200).json(conversionResult)
   } catch (error) {

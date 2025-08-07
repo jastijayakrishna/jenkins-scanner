@@ -27,7 +27,9 @@
       "Bash(npx next dev:*)",
       "Bash(ls:*)",
       "Bash(cp:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(git restore:*)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }

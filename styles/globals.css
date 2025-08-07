@@ -2,25 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Light theme root variables and global styles */
+/* Modern white and blue theme with high contrast */
 :root {
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8fafc;
-  --bg-tertiary: #f1f5f9;
-  --bg-card: #ffffff;
-  --bg-overlay: rgba(0, 0, 0, 0.5);
-  --border-primary: #e2e8f0;
-  --border-secondary: #cbd5e1;
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
-  --text-muted: #94a3b8;
-  --accent-primary: #3b82f6;
-  --accent-secondary: #1d4ed8;
-  --accent-success: #10b981;
-  --accent-warning: #f59e0b;
-  --accent-error: #ef4444;
-  --glass-bg: rgba(255, 255, 255, 0.8);
-  --glass-border: rgba(226, 232, 240, 0.5);
+  --bg-primary: #ffffff;      /* Pure white background */
+  --bg-secondary: #f8fafc;    /* Very light blue-tinted white */
+  --bg-tertiary: #f1f5f9;     /* Light blue-grey */
+  --bg-card: #ffffff;         /* Pure white cards */
+  --bg-overlay: rgba(30, 58, 138, 0.4);  /* Blue overlay */
+  --border-primary: #e2e8f0;  /* Clear border */
+  --border-secondary: #cbd5e1; /* Visible border */
+  --text-primary: #0f172a;    /* Dark slate for high contrast */
+  --text-secondary: #475569;  /* Medium grey for readability */
+  --text-muted: #64748b;      /* Muted grey */
+  --accent-primary: #2563eb;  /* Modern blue */
+  --accent-secondary: #1d4ed8; /* Darker blue */
+  --accent-success: #059669;  /* Clean green */
+  --accent-warning: #d97706;  /* Orange */
+  --accent-error: #dc2626;    /* Clear red */
+  --glass-bg: rgba(248, 250, 252, 0.95);    /* Clean glass */
+  --glass-border: rgba(226, 232, 240, 0.8); /* Clear border */
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);   /* Subtle shadow */
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1); /* Larger shadow */
 }
 
 * {
@@ -32,8 +34,12 @@
 html, body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
   scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Light scrollbar styling */
@@ -55,12 +61,40 @@ html, body {
   background: #94a3b8;
 }
 
-/* Custom glass card styling */
+/* Modern card and glass styling */
 .glass-card {
   background: var(--glass-bg);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
   border: 1px solid var(--glass-border);
-  border-radius: 16px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
+.modern-card {
+  background: white;
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  transition: all 0.2s ease;
+}
+
+.modern-card:hover {
+  box-shadow: var(--shadow-lg);
+  border-color: var(--border-secondary);
+}
+
+.error-card {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
+.success-card {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
 }
 
 /* Enhanced blob for light theme */
@@ -120,16 +154,59 @@ html, body {
 }
 .animate-glow { animation: glow 2s ease-in-out infinite; }
 
-/* Light theme button styles */
+/* Modern button styles - white and blue theme */
 .btn-primary {
-  @apply bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 
-         text-white font-medium px-6 py-3 rounded-lg transition-all duration-200
-         shadow-lg hover:shadow-xl hover:-translate-y-0.5;
+  background: var(--accent-primary);
+  color: white;
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  box-shadow: var(--shadow);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background: var(--accent-secondary);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
 }
 
 .btn-secondary {
-  @apply bg-white hover:bg-gray-50 text-gray-700 font-medium px-6 py-3 
-         rounded-lg transition-all duration-200 border border-gray-300 hover:border-gray-400 shadow-sm;
+  background: white;
+  color: var(--text-primary);
+  font-weight: 500;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: 2px solid var(--border-secondary);
+  box-shadow: var(--shadow);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: var(--bg-secondary);
+  border-color: var(--accent-primary);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-error {
+  background: var(--accent-error);
+  color: white;
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  box-shadow: var(--shadow);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-error:hover {
+  background: #b91c1c;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
 }
 
 /* Light code block styling */

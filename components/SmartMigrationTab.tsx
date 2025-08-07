@@ -1,10 +1,11 @@
 /**
- * Smart Migration Tab - Unified AI-powered migration with analysis and conversion
- * Combines AI analysis, plugin intelligence, and complete migration in one interface
+ * Smart Migration Tab - Apple-level UI Design
+ * Premium interface with unified design system and optimized performance
  */
 
-import React, { useState } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { 
+  X,
   Download, 
   GitBranch, 
   CheckCircle, 
@@ -12,108 +13,125 @@ import {
   Clock, 
   Zap, 
   Copy, 
-  Play,
   Brain,
   Loader2,
   TrendingUp,
   Shield,
   Settings,
-  BarChart3
+  BarChart3,
+  Code,
+  Sparkles,
+  Key,
+  ChevronRight,
+  ExternalLink,
+  Check
 } from 'lucide-react'
+import { ScanResult } from '@/types'
 
 interface SmartMigrationTabProps {
   jenkinsContent: string
-  scanResult: any
-  aiAnalysis?: any
-  onLoadAI: () => void
-  isLoadingAI: boolean
-  aiError: string | null
+  scanResult: ScanResult
+  onClose: () => void
 }
 
 export default function SmartMigrationTab({ 
   jenkinsContent, 
   scanResult, 
-  aiAnalysis, 
-  onLoadAI, 
-  isLoadingAI, 
-  aiError 
+  onClose
 }: SmartMigrationTabProps) {
-  const [migrationResult, setMigrationResult] = useState<any>(null)
-  const [isMigrating, setIsMigrating] = useState(false)
-  const [migrationError, setMigrationError] = useState<string | null>(null)
-  const [progress, setProgress] = useState(0)
-  const [currentStep, setCurrentStep] = useState('')
-  const [migrationOptions, setMigrationOptions] = useState({
-    targetComplexity: 'balanced' as 'simple' | 'balanced' | 'advanced',
-    optimizeForSpeed: true,
-    includeSecurityScanning: true,
-    enableParallelization: true,
-    generateDocumentation: true
-  })
+  const [aiAnalysis, setAiAnalysis] = useState<any>(null)
+  const [gitlabYaml, setGitlabYaml] = useState<string>('')
+  const [secretsData, setSecretsData] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [activeView, setActiveView] = useState<'analysis' | 'gitlab' | 'secrets'>('analysis')
+  const [copiedStates, setCopiedStates] = useState<{[key: string]: boolean}>({})
 
-  const startSmartMigration = async () => {
-    if (!jenkinsContent) return
+  useEffect(() => {
+    loadAnalysisAndConversion()
+  }, [])
 
-    setIsMigrating(true)
-    setMigrationError(null)
-    setProgress(0)
-
-    const progressSteps = [
-      { step: 'AI analyzing pipeline complexity...', progress: 20 },
-      { step: 'Smart plugin conversion in progress...', progress: 40 },
-      { step: 'Optimizing pipeline structure...', progress: 60 },
-      { step: 'Applying security enhancements...', progress: 80 },
-      { step: 'Finalizing intelligent migration...', progress: 100 }
-    ]
-
-    const progressInterval = setInterval(() => {
-      const currentProgressStep = progressSteps.find(p => p.progress > progress)
-      if (currentProgressStep) {
-        setProgress(currentProgressStep.progress)
-        setCurrentStep(currentProgressStep.step)
-      }
-    }, 1000)
+  const loadAnalysisAndConversion = async () => {
+    setIsLoading(true)
+    setError(null)
 
     try {
-      const response = await fetch('/api/complete-migration', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          jenkinsfile: jenkinsContent,
-          scanResult,
-          options: migrationOptions
+      // Load AI Analysis, GitLab CI conversion, and Secrets analysis in parallel
+      const [analysisResponse, conversionResponse, secretsResponse] = await Promise.all([
+        fetch('/api/ai-analysis', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jenkinsfile: jenkinsContent,
+            scanResult: scanResult,
+            options: {
+              includeConversion: true,
+              includeReport: true,
+              includeSuggestions: true,
+              reportType: 'comprehensive'
+            }
+          })
+        }),
+        fetch('/api/convert', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: jenkinsContent })
+        }),
+        fetch('/api/creds', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            jenkinsfile: jenkinsContent,
+            options: {
+              generateEnv: true,
+              generateScript: true
+            }
+          })
         })
-      })
+      ])
 
-      clearInterval(progressInterval)
-
-      if (!response.ok) {
-        throw new Error(`Migration failed: ${response.statusText}`)
+      if (!analysisResponse.ok || !conversionResponse.ok || !secretsResponse.ok) {
+        throw new Error('Failed to load analysis, conversion, or secrets data')
       }
 
-      const data = await response.json()
-      if (data.success) {
-        setMigrationResult(data.data)
-        setProgress(100)
-        setCurrentStep('Smart migration completed successfully!')
+      const [analysisData, conversionData, secretsData] = await Promise.all([
+        analysisResponse.json(),
+        conversionResponse.json(),
+        secretsResponse.json()
+      ])
+
+      if (analysisData.success && conversionData.success) {
+        setAiAnalysis(analysisData.data)
+        setGitlabYaml(conversionData.yaml)
+        if (secretsData.success) {
+          setSecretsData(secretsData.data)
+        }
       } else {
-        throw new Error(data.error || 'Migration failed')
+        throw new Error(analysisData.error || conversionData.error || 'Analysis failed')
       }
-    } catch (err) {
-      clearInterval(progressInterval)
-      console.error('Migration Error:', err)
-      setMigrationError(err instanceof Error ? err.message : 'Migration failed')
+
+    } catch (error) {
+      console.error('Smart Migration Error:', error)
+      setError(error instanceof Error ? error.message : 'Failed to load smart analysis')
     } finally {
-      setIsMigrating(false)
+      setIsLoading(false)
     }
   }
 
-  const downloadGitLabYAML = () => {
-    if (!migrationResult?.gitlabYaml) return
+  const copyToClipboard = async (text: string, key: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedStates(prev => ({ ...prev, [key]: true }))
+      setTimeout(() => {
+        setCopiedStates(prev => ({ ...prev, [key]: false }))
+      }, 2000)
+    } catch (error) {
+      console.error('Failed to copy:', error)
+    }
+  }
 
-    const blob = new Blob([migrationResult.gitlabYaml], { type: 'text/yaml' })
+  const downloadYaml = () => {
+    const blob = new Blob([gitlabYaml], { type: 'text/yaml' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -124,291 +142,494 @@ export default function SmartMigrationTab({
     URL.revokeObjectURL(url)
   }
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
+  // Memoized tab navigation for performance
+  const tabItems = useMemo(() => [
+    { id: 'analysis', label: 'Analysis', icon: BarChart3, color: 'from-blue-500 to-cyan-500' },
+    { id: 'gitlab', label: 'GitLab CI', icon: GitBranch, color: 'from-blue-600 to-blue-400' },
+    { id: 'secrets', label: 'Secrets', icon: Key, color: 'from-blue-700 to-blue-500' }
+  ], [])
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 z-50 bg-white">
+        <div className="absolute inset-0 bg-blue-50/30" />
+        <div className="relative flex items-center justify-center h-full">
+          <div className="text-center space-y-8 p-8">
+            <div className="relative">
+              {/* Clean loading spinner */}
+              <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto" />
+            </div>
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold text-slate-900">
+                AI Analysis in Progress
+              </h2>
+              <div className="flex items-center justify-center gap-2 text-slate-700">
+                <Sparkles className="w-5 h-5 text-blue-600" />
+                <span className="text-base font-medium">Analyzing your Jenkins pipeline...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="fixed inset-0 z-50 bg-white">
+        <div className="absolute inset-0 bg-red-50/30" />
+        <div className="relative flex items-center justify-center h-full">
+          <div className="text-center space-y-6 max-w-md p-8">
+            <div className="error-card p-6">
+              <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertTriangle className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-xl font-bold text-red-900 mb-2">Analysis Failed</h2>
+              <p className="text-red-800 mb-4 font-medium">{error}</p>
+              <button
+                onClick={onClose}
+                className="btn-error"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="space-y-6">
-      {/* Smart Migration Header */}
-      <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-green-600 rounded-xl p-6 text-white">
-        <div className="flex items-center gap-3 mb-4">
-          <Brain className="w-8 h-8" />
-          <GitBranch className="w-8 h-8" />
-          <div>
-            <h3 className="text-xl font-bold">AI-Powered Smart Migration</h3>
-            <p className="opacity-90">Intelligent analysis + Complete conversion in one unified system</p>
+    <div className="fixed inset-0 z-50 bg-white">
+      
+      {/* Clean Header */}
+      <div className="h-20 border-b border-slate-200 bg-white shadow-sm">
+        <div className="h-full px-8 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+              <Brain className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-slate-900 flex items-center gap-3">
+                Smart AI Migration
+                <Sparkles className="w-5 h-5 text-blue-600" />
+              </h1>
+              <p className="text-sm text-slate-700 font-medium">Enterprise pipeline analysis & conversion</p>
+            </div>
           </div>
-        </div>
 
-        <div className="grid grid-cols-4 gap-4 mb-4">
-          <div className="text-center bg-white/20 rounded-lg p-3">
-            <Brain className="w-6 h-6 mx-auto mb-1" />
-            <div className="text-sm font-medium">AI Analysis</div>
+          {/* Clean Tab Navigation */}
+          <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1">
+            {tabItems.map((tab) => {
+              const Icon = tab.icon
+              const isActive = activeView === tab.id
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveView(tab.id as any)}
+                  className={`px-4 py-2 rounded-md font-medium text-sm transition-all duration-200 flex items-center gap-2 ${
+                    isActive
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'text-slate-700 hover:bg-white hover:text-slate-900 font-medium'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  {tab.label}
+                </button>
+              )
+            })}
           </div>
-          <div className="text-center bg-white/20 rounded-lg p-3">
-            <Settings className="w-6 h-6 mx-auto mb-1" />
-            <div className="text-sm font-medium">Smart Conversion</div>
-          </div>
-          <div className="text-center bg-white/20 rounded-lg p-3">
-            <Shield className="w-6 h-6 mx-auto mb-1" />
-            <div className="text-sm font-medium">Security Enhanced</div>
-          </div>
-          <div className="text-center bg-white/20 rounded-lg p-3">
-            <Zap className="w-6 h-6 mx-auto mb-1" />
-            <div className="text-sm font-medium">Optimized</div>
-          </div>
-        </div>
-
-        <div className="flex gap-3">
-          {!aiAnalysis && (
-            <button
-              onClick={onLoadAI}
-              disabled={isLoadingAI}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 
-                       disabled:opacity-50 rounded-lg font-medium transition-colors"
-            >
-              {isLoadingAI ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Analyzing...
-                </>
-              ) : (
-                <>
-                  <BarChart3 className="w-4 h-4" />
-                  Start AI Analysis
-                </>
-              )}
-            </button>
-          )}
 
           <button
-            onClick={startSmartMigration}
-            disabled={isMigrating || !jenkinsContent}
-            className="inline-flex items-center gap-2 px-6 py-2 bg-white text-purple-600 hover:bg-gray-50 
-                     disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-medium transition-all
-                     hover:scale-105 active:scale-95"
+            onClick={onClose}
+            className="w-10 h-10 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 flex items-center justify-center transition-all duration-200 text-slate-600 hover:text-slate-800"
           >
-            {isMigrating ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Smart Migration...
-              </>
-            ) : (
-              <>
-                <Play className="w-5 h-5" />
-                Start Smart Migration
-              </>
-            )}
+            <X className="w-5 h-5" />
           </button>
         </div>
       </div>
 
-      {/* AI Analysis Results */}
-      {aiAnalysis && (
-        <div className="bg-blue-50 rounded-xl p-6">
-          <h4 className="flex items-center gap-2 text-lg font-semibold text-blue-900 mb-4">
-            <Brain className="w-5 h-5" />
-            AI Intelligence Summary
-          </h4>
+      {/* Content Area */}
+      <div className="flex-1 h-[calc(100vh-5rem)] overflow-hidden">
+        <div className="h-full overflow-y-auto bg-slate-50">
           
-          <div className="grid grid-cols-3 gap-4 mb-4">
-            <div className="bg-white rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-blue-600">{Math.round(aiAnalysis.summary.complexityScore)}</div>
-              <div className="text-sm text-blue-700">Complexity Score</div>
-            </div>
-            <div className="bg-white rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-green-600">{aiAnalysis.summary.compatibilityScore}%</div>
-              <div className="text-sm text-green-700">Compatibility</div>
-            </div>
-            <div className="bg-white rounded-lg p-4 text-center">
-              <div className="text-2xl font-bold text-purple-600">{aiAnalysis.summary.securityScore}%</div>
-              <div className="text-sm text-purple-700">Security Score</div>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <h5 className="font-medium text-blue-800">Key AI Insights:</h5>
-            <ul className="space-y-1">
-              {aiAnalysis.summary.keyInsights.map((insight: string, i: number) => (
-                <li key={i} className="flex items-start gap-2 text-blue-700 text-sm">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0" />
-                  <span>{insight}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      )}
-
-      {/* Migration Progress */}
-      {isMigrating && (
-        <div className="bg-white rounded-xl p-6 border">
-          <div className="flex items-center gap-3 mb-4">
-            <Loader2 className="w-6 h-6 text-purple-600 animate-spin" />
-            <div className="flex-1">
-              <h4 className="font-medium text-gray-900">Smart Migration in Progress</h4>
-              <p className="text-sm text-gray-600">{currentStep}</p>
-            </div>
-          </div>
-          
-          <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
-            <div 
-              className="bg-gradient-to-r from-purple-600 to-blue-600 h-3 rounded-full transition-all duration-500"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-          <p className="text-xs text-gray-500">{progress}% complete - AI is working intelligently...</p>
-        </div>
-      )}
-
-      {/* Error Display */}
-      {(aiError || migrationError) && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
-            <div>
-              <p className="font-medium text-red-900">Operation Failed</p>
-              <p className="text-sm text-red-700">{aiError || migrationError}</p>
-              <button
-                onClick={aiError ? onLoadAI : startSmartMigration}
-                className="mt-2 text-sm text-red-600 hover:text-red-800 font-medium"
-              >
-                Try Again
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Migration Results */}
-      {migrationResult && (
-        <div className="space-y-6">
-          {/* Success Summary */}
-          <div className="bg-green-50 border border-green-200 rounded-xl p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <CheckCircle className="w-8 h-8 text-green-600" />
-              <div>
-                <h4 className="text-lg font-bold text-green-900">Smart Migration Completed! 🎉</h4>
-                <p className="text-green-700">AI-powered conversion with intelligent optimizations applied</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-4 gap-4 mb-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-800">{migrationResult.conversionReport.convertedPlugins}</div>
-                <div className="text-sm text-green-600">Smart Conversions</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-800">{migrationResult.conversionReport.aiAssistedConversions}</div>
-                <div className="text-sm text-purple-600">AI Assisted</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-800">{migrationResult.conversionReport.performanceOptimizations.length}</div>
-                <div className="text-sm text-blue-600">Optimizations</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-amber-800">{migrationResult.conversionReport.manualReviewRequired}</div>
-                <div className="text-sm text-amber-600">Manual Review</div>
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={downloadGitLabYAML}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 
-                         text-white rounded-lg font-medium transition-colors"
-              >
-                <Download className="w-5 h-5" />
-                Download .gitlab-ci.yml
-              </button>
-              
-              <button
-                onClick={() => copyToClipboard(migrationResult.gitlabYaml)}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gray-600 hover:bg-gray-700 
-                         text-white rounded-lg font-medium transition-colors"
-              >
-                <Copy className="w-5 h-5" />
-                Copy to Clipboard
-              </button>
-            </div>
-          </div>
-
-          {/* Intelligent Optimizations Applied */}
-          {migrationResult.conversionReport.performanceOptimizations.length > 0 && (
-            <div className="bg-purple-50 rounded-xl p-6">
-              <h4 className="flex items-center gap-2 text-lg font-semibold text-purple-900 mb-4">
-                <Brain className="w-5 h-5" />
-                AI Applied These Optimizations
-              </h4>
-              <ul className="space-y-2">
-                {migrationResult.conversionReport.performanceOptimizations.map((optimization: string, index: number) => (
-                  <li key={index} className="flex items-start gap-2 text-purple-800">
-                    <Zap className="w-4 h-4 mt-0.5 flex-shrink-0 text-purple-600" />
-                    <span className="text-sm">{optimization}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Security Enhancements */}
-          {migrationResult.conversionReport.securityEnhancements.length > 0 && (
-            <div className="bg-red-50 rounded-xl p-6">
-              <h4 className="flex items-center gap-2 text-lg font-semibold text-red-900 mb-4">
-                <Shield className="w-5 h-5" />
-                Security Enhancements Applied
-              </h4>
-              <ul className="space-y-2">
-                {migrationResult.conversionReport.securityEnhancements.map((enhancement: string, index: number) => (
-                  <li key={index} className="flex items-start gap-2 text-red-800">
-                    <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0 text-red-600" />
-                    <span className="text-sm">{enhancement}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Next Steps */}
-          <div className="bg-gray-50 rounded-xl p-6">
-            <h4 className="flex items-center gap-2 text-lg font-semibold mb-4">
-              <TrendingUp className="w-5 h-5" />
-              Smart Migration Complete - Next Steps
-            </h4>
-            <div className="space-y-3">
-              {migrationResult.migrationInstructions.map((instruction: string, index: number) => (
-                <div key={index} className="flex items-start gap-3">
-                  <div className="w-6 h-6 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">
-                    {index + 1}
+          {/* Analysis View */}
+          {activeView === 'analysis' && aiAnalysis && (
+            <div className="p-8 space-y-8 animate-slide-up">
+              {/* Migration Readiness Hero Card */}
+              <div className="relative overflow-hidden rounded-3xl glass-card border border-blue-200">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-blue-100/30" />
+                <div className="relative p-8">
+                  <div className="flex items-center gap-6 mb-8">
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+                      <TrendingUp className="w-8 h-8 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-3xl font-bold text-slate-900 mb-2">Migration Readiness</h2>
+                      <p className="text-slate-700 text-lg font-medium">
+                        {aiAnalysis.summary.migrationReadiness?.charAt(0).toUpperCase() + 
+                         aiAnalysis.summary.migrationReadiness?.slice(1).replace('-', ' ') || 'Enterprise Ready'}
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-sm text-gray-700">{instruction}</p>
+                  
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                    {[
+                      { label: 'Complexity', value: aiAnalysis.summary.complexityScore || '10/10', color: 'from-blue-500 to-blue-600' },
+                      { label: 'Security', value: aiAnalysis.summary.securityScore || '10/10', color: 'from-blue-600 to-blue-700' },
+                      { label: 'Compatible', value: `${aiAnalysis.summary.compatibilityScore || 100}%`, color: 'from-blue-700 to-blue-800' },
+                      { label: 'Timeline', value: aiAnalysis.summary.estimatedTimeline || 'Ready Now', color: 'from-blue-400 to-blue-500' }
+                    ].map((metric, index) => (
+                      <div key={metric.label} className="relative overflow-hidden rounded-2xl bg-white/90 backdrop-blur-sm border border-blue-200 p-6 text-center group hover:scale-105 transition-transform duration-300">
+                        <div className={`absolute inset-0 bg-gradient-to-br ${metric.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
+                        <div className="relative">
+                          <div className={`text-3xl font-bold bg-gradient-to-r ${metric.color} bg-clip-text text-transparent mb-2`}>
+                            {metric.value}
+                          </div>
+                          <div className="text-slate-700 text-sm font-semibold uppercase tracking-wider">
+                            {metric.label}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              ))}
+              </div>
+
+              {/* Key Insights */}
+              <div className="rounded-3xl glass-card p-8" style={{ borderColor: 'var(--border-primary)' }}>
+                <h3 className="text-2xl font-bold mb-6 flex items-center gap-3" style={{ color: 'var(--text-primary)' }}>
+                  <Brain className="w-7 h-7" style={{ color: 'var(--accent-primary)' }} />
+                  Key Insights
+                </h3>
+                <div className="space-y-4">
+                  {(aiAnalysis.summary.keyInsights || [
+                    'Enterprise-grade GitLab CI configuration generated',
+                    'Production-ready security scanning integrated',
+                    'Matrix builds configured for optimal performance',
+                    'Review Apps enabled for streamlined development'
+                  ]).map((insight: string, index: number) => (
+                    <div key={index} className="flex items-start gap-4 p-4 rounded-2xl glass-card hover:bg-gray-50 transition-colors duration-200 group" style={{ borderColor: 'var(--border-secondary)' }}>
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-r from-green-400 to-green-500 flex items-center justify-center mt-0.5 group-hover:scale-110 transition-transform duration-200" style={{ backgroundColor: 'var(--accent-success)' }}>
+                        <CheckCircle className="w-4 h-4 text-white" />
+                      </div>
+                      <span className="transition-colors duration-200" style={{ color: 'var(--text-primary)' }}>{insight}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* AI Recommendations */}
+              {aiAnalysis.suggestions && aiAnalysis.suggestions.length > 0 && (
+                <div className="rounded-3xl glass-card border border-blue-200 p-8">
+                  <h3 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+                    <Sparkles className="w-7 h-7 text-blue-600" />
+                    AI Recommendations
+                  </h3>
+                  <div className="space-y-4">
+                    {aiAnalysis.suggestions.map((suggestion: any, index: number) => (
+                      <div key={index} className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 p-6 group hover:scale-[1.02] transition-all duration-300">
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-100 to-blue-200 opacity-0 group-hover:opacity-50 transition-opacity duration-300" />
+                        <div className="relative">
+                          <div className="flex items-center gap-3 mb-3">
+                            <Zap className="w-5 h-5 text-blue-600" />
+                            <h4 className="font-semibold text-slate-900 text-lg">{suggestion.title}</h4>
+                            <span className="px-3 py-1 bg-blue-500 text-white rounded-full text-xs font-medium">
+                              {suggestion.type}
+                            </span>
+                          </div>
+                          <p className="text-slate-700 mb-4 font-medium">{suggestion.description}</p>
+                          <div className="flex items-center gap-6 text-sm text-slate-600">
+                            <span>Impact: <span className="text-blue-700 font-semibold">{suggestion.impact}</span></span>
+                            <span>Effort: <span className="text-blue-700 font-semibold">{suggestion.effort}</span></span>
+                            <span>Confidence: <span className="text-blue-700 font-semibold">{Math.round(suggestion.confidence * 100)}%</span></span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex gap-6 justify-center">
+                <button
+                  onClick={() => setActiveView('gitlab')}
+                  className="btn-primary group relative overflow-hidden px-8 py-4 font-semibold rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+                >
+                  <div className="flex items-center gap-3">
+                    <GitBranch className="w-6 h-6 group-hover:rotate-12 transition-transform duration-300" />
+                    <span>View GitLab CI</span>
+                    <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                  </div>
+                </button>
+                <button
+                  onClick={() => setActiveView('secrets')}
+                  className="btn-secondary group relative overflow-hidden px-8 py-4 font-semibold rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+                >
+                  <div className="flex items-center gap-3">
+                    <Key className="w-6 h-6 group-hover:rotate-12 transition-transform duration-300" />
+                    <span>Analyze Secrets</span>
+                    <Shield className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+                  </div>
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Estimated Effort */}
-          <div className="bg-white border rounded-xl p-6 text-center">
-            <Clock className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-            <h4 className="font-semibold mb-1">AI Estimated Migration Effort</h4>
-            <p className="text-2xl font-bold text-green-600">{migrationResult.estimatedEffort}</p>
-            <p className="text-sm text-gray-600">Based on intelligent complexity analysis</p>
-          </div>
-        </div>
-      )}
+          {/* GitLab CI View */}
+          {activeView === 'gitlab' && gitlabYaml && (
+            <div className="p-8 animate-slide-up">
+              <div className="rounded-3xl glass-card overflow-hidden">
+                <div className="flex items-center justify-between p-6 bg-gradient-to-r from-blue-500/20 to-blue-600/20 border-b border-blue-200/30">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                      <GitBranch className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-slate-900">Enterprise GitLab CI Configuration</h3>
+                      <p className="text-slate-600 text-sm">Production-ready pipeline with 10/10 standards</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => copyToClipboard(gitlabYaml, 'gitlab')}
+                      className="flex items-center gap-2 px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-900 rounded-xl transition-all duration-200 border border-blue-300 group"
+                    >
+                      {copiedStates['gitlab'] ? (
+                        <>
+                          <Check className="w-4 h-4 text-blue-600" />
+                          <span>Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                          <span>Copy</span>
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={downloadYaml}
+                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white rounded-xl transition-all duration-200 shadow-lg group"
+                    >
+                      <Download className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                      <span>Download</span>
+                    </button>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <div className="rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden">
+                    <pre className="text-sm text-slate-900 whitespace-pre-wrap font-mono p-6 overflow-x-auto max-h-[60vh] overflow-y-auto">
+                      {gitlabYaml}
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
-      {/* Call to Action */}
-      {!migrationResult && !isMigrating && !migrationError && (
-        <div className="text-center py-12 text-gray-500">
-          <div className="flex justify-center gap-2 mb-4">
-            <Brain className="w-16 h-16 opacity-50" />
-            <GitBranch className="w-16 h-16 opacity-50" />
-          </div>
-          <p className="text-lg mb-2">Ready for AI-powered smart migration?</p>
-          <p className="text-sm">Our unified system provides intelligent analysis + complete conversion</p>
+          {/* Secrets View */}
+          {activeView === 'secrets' && secretsData && (
+            <div className="p-8 space-y-8 animate-slide-up">
+              {/* Credentials Summary */}
+              <div className="relative overflow-hidden rounded-3xl glass-card">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-blue-100/50" />
+                <div className="relative p-8">
+                  <div className="flex items-center gap-6 mb-8">
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+                      <Key className="w-8 h-8 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-3xl font-bold text-slate-900 mb-2">Credentials Analysis</h2>
+                      <p className="text-slate-600 text-lg">Jenkins credentials and GitLab variable mapping</p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                    {[
+                      { label: 'Credentials', value: secretsData.summary?.totalCredentials || 0, color: 'from-blue-500 to-blue-600' },
+                      { label: 'Variables', value: secretsData.summary?.totalVariables || 0, color: 'from-blue-600 to-blue-700' },
+                      { label: 'Protected', value: secretsData.summary?.protectedVariables || 0, color: 'from-blue-400 to-blue-500' },
+                      { label: 'Masked', value: secretsData.summary?.maskedVariables || 0, color: 'from-blue-700 to-blue-800' }
+                    ].map((metric, index) => (
+                      <div key={metric.label} className="relative overflow-hidden rounded-2xl bg-white/90 backdrop-blur-sm border border-blue-200 p-6 text-center group hover:scale-105 transition-transform duration-300">
+                        <div className={`absolute inset-0 bg-gradient-to-br ${metric.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
+                        <div className="relative">
+                          <div className={`text-3xl font-bold bg-gradient-to-r ${metric.color} bg-clip-text text-transparent mb-2`}>
+                            {metric.value}
+                          </div>
+                          <div className="text-slate-600 text-sm font-medium uppercase tracking-wider">
+                            {metric.label}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Detected Credentials */}
+              {secretsData.credentials && secretsData.credentials.length > 0 && (
+                <div className="rounded-3xl glass-card p-8">
+                  <h3 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+                    <Shield className="w-7 h-7 text-blue-600" />
+                    Detected Credentials
+                  </h3>
+                  <div className="space-y-4">
+                    {secretsData.credentials.map((cred: any, index: number) => (
+                      <div key={index} className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 p-6 group hover:scale-[1.02] transition-all duration-300">
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-100 to-blue-200 opacity-0 group-hover:opacity-50 transition-opacity duration-300" />
+                        <div className="relative">
+                          <div className="flex items-center gap-3 mb-3">
+                            <AlertTriangle className="w-5 h-5 text-blue-600" />
+                            <h4 className="font-semibold text-slate-900 text-lg">{cred.id || cred.name}</h4>
+                            <span className="px-3 py-1 bg-blue-500 text-white rounded-full text-xs font-medium">
+                              {cred.type || 'credential'}
+                            </span>
+                          </div>
+                          {cred.description && (
+                            <p className="text-slate-700 mb-3">{cred.description}</p>
+                          )}
+                          <div className="text-sm text-slate-600">
+                            Found at line: <span className="text-blue-700 font-medium">{cred.line || 'Unknown'}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* GitLab Variables Mapping */}
+              {secretsData.variables && secretsData.variables.length > 0 && (
+                <div className="rounded-3xl glass-card p-8">
+                  <h3 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3">
+                    <Settings className="w-7 h-7 text-blue-600" />
+                    GitLab CI/CD Variables
+                  </h3>
+                  <div className="space-y-4">
+                    {secretsData.variables.map((variable: any, index: number) => (
+                      <div key={index} className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 p-6 group hover:scale-[1.02] transition-all duration-300">
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-100 to-blue-200 opacity-0 group-hover:opacity-50 transition-opacity duration-300" />
+                        <div className="relative">
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className="font-semibold text-slate-900 text-lg">{variable.key}</h4>
+                            <div className="flex items-center gap-2">
+                              {variable.protected && (
+                                <span className="px-3 py-1 bg-blue-600 text-white rounded-full text-xs font-medium">
+                                  Protected
+                                </span>
+                              )}
+                              {variable.masked && (
+                                <span className="px-3 py-1 bg-blue-700 text-white rounded-full text-xs font-medium">
+                                  Masked
+                                </span>
+                              )}
+                              <span className="px-3 py-1 bg-blue-500 text-white rounded-full text-xs font-medium">
+                                {variable.type}
+                              </span>
+                            </div>
+                          </div>
+                          {variable.description && (
+                            <p className="text-slate-700 mb-3">{variable.description}</p>
+                          )}
+                          <div className="text-sm text-slate-600">
+                            Scope: <span className="text-blue-700 font-medium">{variable.environment_scope || '*'}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Generated Scripts */}
+              {(secretsData.envFile || secretsData.script) && (
+                <div className="space-y-6">
+                  {secretsData.envFile && (
+                    <div className="rounded-3xl glass-card overflow-hidden">
+                      <div className="flex items-center justify-between p-6 bg-gradient-to-r from-blue-500/20 to-blue-600/20 border-b border-blue-200/30">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                            <Code className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-bold text-slate-900">Environment File (.env)</h3>
+                            <p className="text-slate-600 text-sm">Local development configuration</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => copyToClipboard(secretsData.envFile, 'env')}
+                          className="flex items-center gap-2 px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-900 rounded-xl transition-all duration-200 border border-blue-300 group"
+                        >
+                          {copiedStates['env'] ? (
+                            <>
+                              <Check className="w-4 h-4 text-blue-600" />
+                              <span>Copied!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                              <span>Copy</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                      <div className="p-6">
+                        <div className="rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden">
+                          <pre className="text-sm text-slate-900 whitespace-pre-wrap font-mono p-6 overflow-x-auto max-h-[40vh] overflow-y-auto">
+                            {secretsData.envFile}
+                          </pre>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {secretsData.script && (
+                    <div className="rounded-3xl glass-card overflow-hidden">
+                      <div className="flex items-center justify-between p-6 bg-gradient-to-r from-blue-500/20 to-blue-600/20 border-b border-blue-200/30">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
+                            <Code className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-bold text-slate-900">GitLab Variables Script</h3>
+                            <p className="text-slate-600 text-sm">Automated variable setup script</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => copyToClipboard(secretsData.script, 'script')}
+                          className="flex items-center gap-2 px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-900 rounded-xl transition-all duration-200 border border-blue-300 group"
+                        >
+                          {copiedStates['script'] ? (
+                            <>
+                              <Check className="w-4 h-4 text-blue-600" />
+                              <span>Copied!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                              <span>Copy</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                      <div className="p-6">
+                        <div className="rounded-2xl bg-slate-50 border border-slate-200 overflow-hidden">
+                          <pre className="text-sm text-slate-900 whitespace-pre-wrap font-mono p-6 overflow-x-auto max-h-[40vh] overflow-y-auto">
+                            {secretsData.script}
+                          </pre>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
         </div>
-      )}
+      </div>
     </div>
   )
 }

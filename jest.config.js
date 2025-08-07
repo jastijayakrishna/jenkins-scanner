@@ -6,7 +6,26 @@ const createJestConfig = nextJest({
 
 const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-  testEnvironment: 'jest-environment-jsdom',
+  testEnvironment: 'node',
+  testTimeout: 30000,
+  collectCoverageFrom: [
+    'pages/api/**/*.ts',
+    'lib/**/*.ts',
+    'components/**/*.tsx',
+    '!**/*.d.ts',
+  ],
+  coverageThreshold: {
+    global: {
+      branches: 70,
+      functions: 70,
+      lines: 70,
+      statements: 70,
+    },
+  },
+  testMatch: [
+    '**/__tests__/**/*.test.(ts|tsx)',
+    '**/?(*.)+(spec|test).(ts|tsx)',
+  ],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
   },

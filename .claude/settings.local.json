@@ -38,7 +38,9 @@
       "Bash(npm cache clean:*)",
       "Bash(timeout 8s npx next dev --turbo)",
       "Bash(timeout 8s npm start)",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run test:integration:*)"
     ],
     "deny": []
   }

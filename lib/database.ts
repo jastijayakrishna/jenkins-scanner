@@ -5,15 +5,20 @@
  * with enterprise-grade reliability and security.
  */
 
-import { Pool } from 'pg'
+// Mock PostgreSQL for testing/development
+const mockPool = {
+  query: () => Promise.resolve({ rows: [] }),
+  end: () => Promise.resolve()
+}
 
-// Database connection pool for enterprise reliability
-let pool: Pool | null = null
+// Dynamic import for PostgreSQL in production, mock for testing
+let Pool: any
+let pool: any = null
 let useInMemory = false
 
-// Initialize database connection with fallback to in-memory storage
 try {
-  if (process.env.DATABASE_URL) {
+  if (process.env.NODE_ENV !== 'test' && process.env.DATABASE_URL) {
+    Pool = require('pg').Pool
     pool = new Pool({
       connectionString: process.env.DATABASE_URL,
       max: 20,
@@ -21,10 +26,12 @@ try {
       connectionTimeoutMillis: 2000,
     })
   } else {
+    pool = mockPool
     useInMemory = true
-    console.log('⚠️  No DATABASE_URL found, using in-memory storage for development')
+    console.log('⚠️  Using in-memory storage for testing/development')
   }
 } catch (error) {
+  pool = mockPool
   useInMemory = true
   console.log('⚠️  Database connection failed, using in-memory storage:', error)
 }
@@ -485,7 +492,7 @@ export class DatabaseService {
       `
       
       const result = await client.query(query, [projectId, limit])
-      return result.rows.map(row => ({
+      return result.rows.map((row: any) => ({
         ...row,
         plugins: JSON.parse(row.plugins || '[]'),
         ai_recommendations: JSON.parse(row.ai_recommendations || '[]')

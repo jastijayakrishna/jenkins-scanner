@@ -1,6 +1,6 @@
 {
   "name": "jenkins-scanner",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "main": "index.js",
   "scripts": {
     "dev": "next dev",
@@ -8,6 +8,10 @@
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
+    "test": "jest --passWithNoTests",
+    "test:integration": "jest --testMatch='**/__tests__/integration/*.test.ts'",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "security:scan": "npm audit --audit-level=high",
     "docker:build": "docker build -t jenkins-scanner .",
     "docker:run": "docker run -p 3000:3000 jenkins-scanner"
@@ -26,16 +30,21 @@
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
     "@types/node": "^20.19.9",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
     "autoprefixer": "^10.4.14",
     "eslint": "^9.32.0",
     "eslint-config-next": "^15.4.5",
+    "jest": "^30.0.5",
+    "jest-environment-jsdom": "^30.0.5",
+    "node-mocks-http": "^1.17.2",
     "postcss": "^8.4.31",
     "prettier": "^3.6.2",
     "tailwindcss": "^3.3.0",
     "tailwindcss-animate": "^1.0.7",
+    "ts-jest": "^29.2.5",
     "typescript": "^5.9.2"
   }
 }

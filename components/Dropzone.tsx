@@ -98,14 +98,25 @@ export default function Dropzone({ onScan }: DropzoneProps) {
       className={`
         group relative mx-auto flex max-w-xl flex-col items-center
         justify-center rounded-3xl border-2 border-dashed p-12 text-center
-        transition-all duration-300 cursor-pointer
-        ${isDragActive ? 'dropzone-active border-blue-500 bg-blue-50' : 'dropzone-idle border-gray-300 hover:border-gray-400 bg-white/50'}
+        transition-all duration-300 cursor-pointer focus-within:outline-none
+        ${isDragActive ? 'dropzone-active' : 'dropzone-idle'}
         ${isDragAccept ? 'border-green-500 bg-green-50' : ''}
         ${isDragReject ? 'border-red-500 bg-red-50' : ''}
       `}
-      aria-disabled={false}
+      style={{
+        transition: 'all var(--duration-medium) var(--easing-standard)'
+      }}
+      onFocus={() => console.log('Dropzone focused')}
+      tabIndex={0}
+      role="button"
+      aria-label="Upload Jenkinsfile"
     >
-      <input {...getInputProps()} aria-label="Jenkinsfile input" ref={inputRef} />
+      <input 
+        {...getInputProps()} 
+        aria-label="Jenkinsfile input" 
+        ref={inputRef}
+        className="sr-only focus:outline-none"
+      />
 
       {/* animated gradient halo (hidden until drag-over) */}
       <div
@@ -120,30 +131,57 @@ export default function Dropzone({ onScan }: DropzoneProps) {
       />
 
       {/* icon */}
-      <div className="mb-6 rounded-full bg-brand-500/20 p-4 text-brand-600" aria-hidden="true">
+      <div className="mb-6 rounded-full p-4 transition-all duration-300" 
+           style={{
+             background: 'var(--system-blue-light)',
+             color: 'var(--accent-primary)'
+           }}
+           aria-hidden="true">
         {fileMeta ? (
-          <FileText className="h-10 w-10" />
+          <FileText className="h-10 w-10 transition-transform duration-300 group-hover:scale-110" />
         ) : (
-          <UploadCloud className="h-10 w-10 animate-pulse-fast" />
+          <UploadCloud className="h-10 w-10 animate-pulse-fast transition-transform duration-300 group-hover:scale-110" />
         )}
       </div>
 
       {/* instructions or file meta */}
       {fileMeta ? (
-        <div className="space-y-1">
-          <p className="text-lg font-medium text-gray-900">
+        <div className="space-y-2">
+          <p className="text-lg font-medium" style={{
+            fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif',
+            fontWeight: 590,
+            letterSpacing: '-0.022em',
+            color: 'var(--text-primary)'
+          }}>
             {fileMeta.name}
           </p>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm" style={{
+            fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif',
+            fontWeight: 400,
+            letterSpacing: '-0.022em',
+            color: 'var(--text-secondary)',
+            lineHeight: 1.47058823529
+          }}>
             {(fileMeta.size / 1024).toFixed(1)} KB — drag a new file to replace
           </p>
         </div>
       ) : (
         <>
-          <p className="text-lg font-medium text-gray-900">
-            Drag & drop your&nbsp;<span className="text-brand-600">Jenkinsfile</span>
+          <p className="text-lg font-medium" style={{
+            fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif',
+            fontWeight: 590,
+            letterSpacing: '-0.022em',
+            color: 'var(--text-primary)'
+          }}>
+            Drag & drop your&nbsp;<span style={{ color: 'var(--accent-primary)' }}>Jenkinsfile</span>
           </p>
-          <p className="mt-1 text-sm text-gray-600">
+          <p className="mt-3 text-sm" style={{
+            fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif',
+            fontWeight: 400,
+            letterSpacing: '-0.022em',
+            color: 'var(--text-secondary)',
+            lineHeight: 1.47058823529
+          }}>
             …or&nbsp;click anywhere to browse (max 2 MB)
           </p>
           <button

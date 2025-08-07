@@ -103,7 +103,11 @@ export default function ResultModal({
                 <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
                   <BarChart3 className="w-4 h-4 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900">Detected Jenkins Plugins</h3>
+                <h3 className="text-xl font-bold text-slate-900" style={{
+                  fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif',
+                  fontWeight: 590,
+                  letterSpacing: '-0.022em'
+                }}>Detected Jenkins Plugins</h3>
               </div>
               
               {result.pluginHits && result.pluginHits.length > 0 ? (
@@ -149,7 +153,11 @@ export default function ResultModal({
                   <div className="w-6 h-6 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
                     <AlertTriangle className="w-4 h-4 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900">Migration Warnings</h3>
+                  <h3 className="text-xl font-bold text-slate-900" style={{
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif',
+                    fontWeight: 590,
+                    letterSpacing: '-0.022em'
+                  }}>Migration Warnings</h3>
                 </div>
                 <div className="glass-card border border-blue-300 p-4 max-h-32 overflow-y-auto">
                   <div className="space-y-2">
@@ -175,17 +183,27 @@ export default function ResultModal({
                   <Sparkles className="w-5 h-5 text-blue-600 animate-pulse" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-2 flex items-center justify-center gap-1">
+                  <h3 className="text-xl font-bold text-slate-900 mb-2 flex items-center justify-center gap-1" style={{
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif',
+                    fontWeight: 590,
+                    letterSpacing: '-0.022em'
+                  }}>
                     Ready for AI-Powered Analysis?
                     <span className="text-blue-600">🚀</span>
                   </h3>
-                  <p className="text-sm text-slate-700 mb-4 font-medium">
+                  <p className="text-sm text-slate-700 mb-4 font-medium" style={{
+                    fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif',
+                    fontWeight: 400,
+                    letterSpacing: '-0.022em',
+                    lineHeight: 1.47058823529,
+                    color: 'var(--text-secondary)'
+                  }}>
                     Get intelligent migration insights, auto-generate your GitLab CI configuration, and receive detailed security recommendations
                   </p>
                   {onViewSmartAnalysis && (
                     <button
                       onClick={onViewSmartAnalysis}
-                      className="group inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-bold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+                      className="group inline-flex items-center gap-2 btn-primary"
                     >
                       <Brain className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" />
                       Start Smart AI Analysis

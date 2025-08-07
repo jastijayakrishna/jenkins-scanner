@@ -4,7 +4,6 @@
  */
 
 import { ScanResult } from '@/types'
-import { dockerDigestValidator } from './docker-digest-validator'
 
 export interface MigrationContext {
   jenkinsfile: string

@@ -4,7 +4,38 @@ console.log('🟢 NEW SCORE MODULE LOADED', scoreVersion);
 
 console.log('🟢 NEW SCORE MODULE LOADED', Date.now())
 import { ScanResult } from '@/types'
-import { detectPlugins } from './plugins'
+
+interface PluginHit {
+  key: string
+  name: string
+  category?: string
+}
+
+function detectPlugins(jenkinsText: string): PluginHit[] {
+  const plugins: PluginHit[] = []
+  
+  // Common plugin patterns
+  const patterns = [
+    { pattern: /withMaven\s*\(/g, key: 'maven', name: 'Maven Plugin', category: 'build' },
+    { pattern: /withGradle\s*\(/g, key: 'gradle', name: 'Gradle Plugin', category: 'build' },
+    { pattern: /withCredentials\s*\(/g, key: 'credentials', name: 'Credentials Plugin', category: 'security' },
+    { pattern: /docker\s*\./g, key: 'docker', name: 'Docker Plugin', category: 'deployment' },
+    { pattern: /git\s+url:/g, key: 'git', name: 'Git Plugin', category: 'scm' },
+    { pattern: /slackSend\s*\(/g, key: 'slack', name: 'Slack Plugin', category: 'notification' },
+    { pattern: /junit\s*\(/g, key: 'junit', name: 'JUnit Plugin', category: 'testing' },
+    { pattern: /archiveArtifacts\s*\(/g, key: 'artifacts', name: 'Archive Artifacts', category: 'build' },
+    { pattern: /publishTestResults\s*\(/g, key: 'test-results', name: 'Test Results Publisher', category: 'testing' },
+    { pattern: /sonarqube\s*\(/g, key: 'sonar', name: 'SonarQube Plugin', category: 'quality' }
+  ]
+  
+  for (const { pattern, key, name, category } of patterns) {
+    if (pattern.test(jenkinsText)) {
+      plugins.push({ key, name, category })
+    }
+  }
+  
+  return plugins
+}
 
 export function scan(jenkinsText: string): ScanResult {
   const lines = jenkinsText.split('\n')

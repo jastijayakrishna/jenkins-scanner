@@ -374,10 +374,10 @@ test:
    */
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'compatible': return 'text-green-600 bg-green-50 border-green-200'
-      case 'partial': return 'text-yellow-600 bg-yellow-50 border-yellow-200'
-      case 'unsupported': return 'text-red-600 bg-red-50 border-red-200'
-      default: return 'text-gray-600 bg-gray-50 border-gray-200'
+      case 'compatible': return 'text-green-300 bg-white/5 border-white/10'
+      case 'partial': return 'text-yellow-300 bg-white/5 border-white/10'
+      case 'unsupported': return 'text-red-300 bg-white/5 border-white/10'
+      default: return 'text-white/70 bg-white/5 border-white/10'
     }
   }
 
@@ -404,11 +404,11 @@ test:
             <h2 className="text-xl font-bold text-red-900">Analysis Failed</h2>
             <p className="text-red-800 font-medium">{error}</p>
             <div className="flex gap-4 justify-center">
-              <button onClick={startPluginAnalysis} className="btn-secondary">
+              <button onClick={startPluginAnalysis} className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-white/10 bg-white/5 text-white hover:bg-white/10">
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Retry
               </button>
-              <button onClick={onClose} className="btn-primary">
+              <button onClick={onClose} className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-white text-black hover:bg-white/90">
                 Close
               </button>
             </div>
@@ -419,23 +419,23 @@ test:
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-white">
+    <div className="fixed inset-0 z-50 bg-black text-white">
       
       {/* Header */}
-      <div className="h-20 border-b border-slate-200 bg-white shadow-sm">
+      <div className="h-20 border-b border-white/10 bg-black shadow-sm">
         <div className="h-full px-8 flex items-center justify-between">
           <div className="flex items-center gap-6">
             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
               <Activity className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
+              <h1 className="text-2xl font-bold text-white flex items-center gap-3">
                 Enterprise Migration Dashboard
-                <span className="text-sm font-normal text-slate-500 bg-slate-100 px-2 py-1 rounded">
+                <span className="text-sm font-normal text-white/70 bg-white/10 px-2 py-1 rounded">
                   {projectId}
                 </span>
               </h1>
-              <p className="text-sm text-slate-600 font-medium">
+              <p className="text-sm text-white/70 font-medium">
                 Real-time plugin analysis and dry-run testing
               </p>
             </div>
@@ -443,22 +443,22 @@ test:
 
           <div className="flex items-center gap-4">
             {/* Auto-refresh toggle */}
-            <button
+              <button
               onClick={() => setAutoRefresh(!autoRefresh)}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                autoRefresh 
-                  ? 'bg-green-100 text-green-800 border border-green-200' 
-                  : 'bg-gray-100 text-gray-600 border border-gray-200'
-              }`}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                  autoRefresh 
+                    ? 'bg-white/10 text-white border border-white/20' 
+                    : 'bg-white/5 text-white/70 border border-white/10'
+                }`}
             >
               <RefreshCw className={`w-4 h-4 ${autoRefresh ? 'animate-spin' : ''}`} />
               Auto-refresh
             </button>
 
             {/* Close button */}
-            <button
+              <button
               onClick={onClose}
-              className="w-10 h-10 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 flex items-center justify-center transition-all duration-200 text-slate-600 hover:text-slate-800"
+                className="w-10 h-10 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 flex items-center justify-center transition-all duration-200 text-white"
             >
               <X className="w-5 h-5" />
             </button>
@@ -467,66 +467,66 @@ test:
       </div>
 
       {/* Tab Navigation */}
-      <div className="border-b border-slate-200 bg-white">
+      <div className="border-b border-white/10 bg-black">
         <div className="px-8 py-4">
           <div className="flex items-center gap-6">
-            <button
+              <button
               onClick={() => setActiveTab('plugins')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                activeTab === 'plugins'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-              }`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                  activeTab === 'plugins'
+                    ? 'bg-white/10 text-white'
+                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                }`}
             >
               <Shield className="w-4 h-4" />
               Plugin Compatibility
               {pluginAnalysis && (
                 <span className={`px-2 py-1 rounded text-xs ${
-                  activeTab === 'plugins' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'
+                  activeTab === 'plugins' ? 'bg-white/20 text-white' : 'bg-white/10 text-white/70'
                 }`}>
                   {pluginAnalysis.total_plugins}
                 </span>
               )}
             </button>
 
-            <button
+              <button
               onClick={() => setActiveTab('dry-run')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                activeTab === 'dry-run'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-              }`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                  activeTab === 'dry-run'
+                    ? 'bg-white/10 text-white'
+                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                }`}
             >
               <Play className="w-4 h-4" />
               Dry-Run Results
               {dryRunResult && (
                 <span className={`px-2 py-1 rounded text-xs ${
                   activeTab === 'dry-run' ? 'bg-white/20 text-white' : 
-                  dryRunResult.status === 'success' ? 'bg-green-200 text-green-800' :
-                  dryRunResult.status === 'failed' ? 'bg-red-200 text-red-800' :
-                  'bg-yellow-200 text-yellow-800'
+                  dryRunResult.status === 'success' ? 'bg-white/10 text-green-300' :
+                  dryRunResult.status === 'failed' ? 'bg-white/10 text-red-300' :
+                  'bg-white/10 text-yellow-300'
                 }`}>
                   {dryRunResult.status}
                 </span>
               )}
             </button>
 
-            <button
+              <button
               onClick={() => {
                 setActiveTab('gitlab')
                 if (!gitlabYaml) generateGitLabYaml()
               }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                activeTab === 'gitlab'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-              }`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                  activeTab === 'gitlab'
+                    ? 'bg-white/10 text-white'
+                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                }`}
             >
               <GitBranch className="w-4 h-4" />
               GitLab CI
               {gitlabYaml && (
                 <span className={`px-2 py-1 rounded text-xs ${
-                  activeTab === 'gitlab' ? 'bg-white/20 text-white' : 'bg-green-200 text-green-800'
+                  activeTab === 'gitlab' ? 'bg-white/20 text-white' : 'bg-white/10 text-green-300'
                 }`}>
                   Ready
                 </span>
@@ -537,7 +537,7 @@ test:
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 h-[calc(100vh-9rem)] overflow-hidden bg-slate-50">
+      <div className="flex-1 h-[calc(100vh-9rem)] overflow-hidden bg-black">
         {activeTab === 'plugins' && (
           <PluginCompatibilityView
             analysis={pluginAnalysis}
@@ -616,11 +616,11 @@ function PluginCompatibilityView({
   if (!analysis) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-center space-y-6">
-          <AlertTriangle className="w-16 h-16 text-yellow-500 mx-auto" />
+          <div className="text-center space-y-6">
+            <AlertTriangle className="w-16 h-16 text-yellow-300 mx-auto" />
           <div>
-            <h3 className="text-xl font-bold text-slate-900">No Analysis Available</h3>
-            <p className="text-slate-600 mt-2">Click retry to start plugin analysis</p>
+              <h3 className="text-xl font-bold text-white">No Analysis Available</h3>
+              <p className="text-white/70 mt-2">Click retry to start plugin analysis</p>
             <button onClick={onRetry} className="btn-primary mt-4">
               <RefreshCw className="w-4 h-4 mr-2" />
               Start Analysis
@@ -634,42 +634,42 @@ function PluginCompatibilityView({
   return (
     <div className="flex flex-col h-full">
       {/* Plugin Summary */}
-      <div className="p-6 bg-white border-b border-slate-200">
+      <div className="p-6 bg-black border-b border-white/10">
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
           <div className="text-center">
-            <div className="text-2xl font-bold text-slate-900">{analysis.total_plugins}</div>
-            <div className="text-sm text-slate-600">Total Plugins</div>
+            <div className="text-2xl font-bold text-white">{analysis.total_plugins}</div>
+            <div className="text-sm text-white/70">Total Plugins</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">{analysis.compatible_plugins}</div>
-            <div className="text-sm text-slate-600">Compatible</div>
+            <div className="text-2xl font-bold text-green-300">{analysis.compatible_plugins}</div>
+            <div className="text-sm text-white/70">Compatible</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-yellow-600">{analysis.partial_plugins}</div>
-            <div className="text-sm text-slate-600">Partial</div>
+            <div className="text-2xl font-bold text-yellow-300">{analysis.partial_plugins}</div>
+            <div className="text-sm text-white/70">Partial</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-red-600">{analysis.unsupported_plugins}</div>
-            <div className="text-sm text-slate-600">Unsupported</div>
+            <div className="text-2xl font-bold text-red-300">{analysis.unsupported_plugins}</div>
+            <div className="text-sm text-white/70">Unsupported</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-red-600">{analysis.blocking_issues}</div>
-            <div className="text-sm text-slate-600">Blockers</div>
+            <div className="text-2xl font-bold text-red-300">{analysis.blocking_issues}</div>
+            <div className="text-sm text-white/70">Blockers</div>
           </div>
         </div>
 
         {/* Compatibility Score */}
         <div className="mb-4">
-          <div className="flex justify-between text-sm font-medium text-slate-700 mb-2">
+          <div className="flex justify-between text-sm font-medium text-white/80 mb-2">
             <span>Compatibility Score</span>
             <span>{analysis.performance.compatibility_score}%</span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className="w-full bg-white/10 rounded-full h-2">
             <div 
               className={`h-2 rounded-full ${
-                analysis.performance.compatibility_score >= 80 ? 'bg-green-500' :
-                analysis.performance.compatibility_score >= 60 ? 'bg-yellow-500' :
-                'bg-red-500'
+                analysis.performance.compatibility_score >= 80 ? 'bg-green-400' :
+                analysis.performance.compatibility_score >= 60 ? 'bg-yellow-300' :
+                'bg-red-400'
               }`}
               style={{ width: `${analysis.performance.compatibility_score}%` }}
             />
@@ -678,24 +678,24 @@ function PluginCompatibilityView({
       </div>
 
       {/* Filters and Search */}
-      <div className="p-6 bg-white border-b border-slate-200">
+      <div className="p-6 bg-black border-b border-white/10">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/50" />
               <input
                 type="text"
                 placeholder="Search plugins..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="pl-10 pr-4 py-2 border border-white/10 bg-white/5 text-sm rounded-lg focus:ring-2 focus:ring-white focus:border-transparent text-white placeholder:text-white/50"
               />
             </div>
 
             <select
               value={pluginFilter}
               onChange={(e) => setPluginFilter(e.target.value as any)}
-              className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-3 py-2 border border-white/10 bg-white/5 text-white rounded-lg text-sm focus:ring-2 focus:ring-white focus:border-transparent"
             >
               <option value="all">All Plugins</option>
               <option value="blocking">Blocking Issues</option>
@@ -704,7 +704,7 @@ function PluginCompatibilityView({
             </select>
           </div>
 
-          <div className="text-sm text-slate-600">
+          <div className="text-sm text-white/70">
             Showing {filteredPlugins.length} of {analysis.total_plugins} plugins
           </div>
         </div>
@@ -716,10 +716,10 @@ function PluginCompatibilityView({
           {filteredPlugins.map((plugin: PluginResult) => (
             <div
               key={`${plugin.plugin_name}-${plugin.line_number}`}
-              className="bg-white rounded border border-slate-200 overflow-hidden hover:shadow-sm transition-shadow"
+              className="bg-white/5 text-white rounded border border-white/10 overflow-hidden hover:bg-white/10 transition-colors"
             >
               <div
-                className="p-3 cursor-pointer hover:bg-slate-50 transition-colors"
+                className="p-3 cursor-pointer hover:bg-white/5 transition-colors"
                 onClick={() => setExpandedPlugin(
                   expandedPlugin === `${plugin.plugin_name}-${plugin.line_number}` 
                     ? null 
@@ -734,9 +734,9 @@ function PluginCompatibilityView({
                     
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-medium text-slate-900 text-sm truncate">{plugin.plugin_name}</h3>
+                        <h3 className="font-medium text-white text-sm truncate">{plugin.plugin_name}</h3>
                         {plugin.plugin_version && (
-                          <span className="text-xs text-slate-500 flex-shrink-0">v{plugin.plugin_version}</span>
+                          <span className="text-xs text-white/60 flex-shrink-0">v{plugin.plugin_version}</span>
                         )}
                         {plugin.is_blocking && (
                           <span className="px-1.5 py-0.5 bg-red-100 text-red-700 text-xs font-medium rounded flex-shrink-0">
@@ -748,35 +748,35 @@ function PluginCompatibilityView({
                   </div>
                   
                   <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                    <span className="text-xs text-slate-500">Line {plugin.line_number}</span>
+                    <span className="text-xs text-white/60">Line {plugin.line_number}</span>
                     {expandedPlugin === `${plugin.plugin_name}-${plugin.line_number}` ? (
-                      <ChevronDown className="w-4 h-4 text-slate-400" />
+                      <ChevronDown className="w-4 h-4 text-white/50" />
                     ) : (
-                      <ChevronRight className="w-4 h-4 text-slate-400" />
+                      <ChevronRight className="w-4 h-4 text-white/50" />
                     )}
                   </div>
                 </div>
               </div>
 
               {expandedPlugin === `${plugin.plugin_name}-${plugin.line_number}` && (
-                <div className="border-t border-slate-200 p-3 bg-slate-50">
+                <div className="border-t border-white/10 p-3 bg-white/5">
                   <div className="space-y-3">
                     <div>
-                      <h4 className="font-medium text-slate-900 mb-1 text-sm">Usage Context</h4>
-                      <p className="text-xs text-slate-600 font-mono bg-white p-2 rounded border">
+                      <h4 className="font-medium text-white mb-1 text-sm">Usage Context</h4>
+                      <p className="text-xs text-white/80 font-mono bg-black p-2 rounded border border-white/10">
                         {plugin.usage_context}
                       </p>
                     </div>
 
                     <div>
-                      <h4 className="font-medium text-slate-900 mb-1 text-sm">Migration Notes</h4>
-                      <p className="text-xs text-slate-700">{plugin.migration_notes}</p>
+                      <h4 className="font-medium text-white mb-1 text-sm">Migration Notes</h4>
+                      <p className="text-xs text-white/80">{plugin.migration_notes}</p>
                     </div>
 
                     {plugin.gitlab_equivalent && (
                       <div>
-                        <h4 className="font-medium text-slate-900 mb-1 text-sm">GitLab Equivalent</h4>
-                        <p className="text-xs text-blue-600 font-medium">{plugin.gitlab_equivalent}</p>
+                        <h4 className="font-medium text-white mb-1 text-sm">GitLab Equivalent</h4>
+                        <p className="text-xs text-white/80 font-medium">{plugin.gitlab_equivalent}</p>
                       </div>
                     )}
 
@@ -857,7 +857,7 @@ function DryRunResultsView({
             <button
               onClick={onStartDryRun}
               disabled={!canStartDryRun}
-              className={`btn-primary ${!canStartDryRun ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-md bg-white text-black hover:bg-white/90 ${!canStartDryRun ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <Play className="w-4 h-4 mr-2" />
               Start Dry-Run
@@ -874,48 +874,48 @@ function DryRunResultsView({
   return (
     <div className="flex flex-col h-full">
       {/* Dry-Run Summary */}
-      <div className="p-6 bg-white border-b border-slate-200">
+      <div className="p-6 bg-black border-b border-white/10">
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
           <div className="text-center">
             <div className={`text-2xl font-bold ${
-              dryRunResult.status === 'success' ? 'text-green-600' :
-              dryRunResult.status === 'failed' ? 'text-red-600' :
-              'text-yellow-600'
+              dryRunResult.status === 'success' ? 'text-green-300' :
+              dryRunResult.status === 'failed' ? 'text-red-300' :
+              'text-yellow-300'
             }`}>
               {dryRunResult.status.toUpperCase()}
             </div>
-            <div className="text-sm text-slate-600">Pipeline Status</div>
+            <div className="text-sm text-white/70">Pipeline Status</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-slate-900">{dryRunResult.total_jobs}</div>
-            <div className="text-sm text-slate-600">Total Jobs</div>
+            <div className="text-2xl font-bold text-white">{dryRunResult.total_jobs}</div>
+            <div className="text-sm text-white/70">Total Jobs</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">{dryRunResult.passed_jobs}</div>
-            <div className="text-sm text-slate-600">Passed</div>
+            <div className="text-2xl font-bold text-green-300">{dryRunResult.passed_jobs}</div>
+            <div className="text-sm text-white/70">Passed</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-red-600">{dryRunResult.failed_jobs}</div>
-            <div className="text-sm text-slate-600">Failed</div>
+            <div className="text-2xl font-bold text-red-300">{dryRunResult.failed_jobs}</div>
+            <div className="text-sm text-white/70">Failed</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-yellow-600">{dryRunResult.warnings.length}</div>
-            <div className="text-sm text-slate-600">Warnings</div>
+            <div className="text-2xl font-bold text-yellow-300">{dryRunResult.warnings.length}</div>
+            <div className="text-sm text-white/70">Warnings</div>
           </div>
         </div>
 
         {/* Success Rate */}
         <div className="mb-4">
-          <div className="flex justify-between text-sm font-medium text-slate-700 mb-2">
+          <div className="flex justify-between text-sm font-medium text-white/80 mb-2">
             <span>Success Rate</span>
             <span>{dryRunResult.summary.success_rate}%</span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className="w-full bg-white/10 rounded-full h-2">
             <div 
               className={`h-2 rounded-full ${
-                dryRunResult.summary.success_rate >= 80 ? 'bg-green-500' :
-                dryRunResult.summary.success_rate >= 60 ? 'bg-yellow-500' :
-                'bg-red-500'
+                dryRunResult.summary.success_rate >= 80 ? 'bg-green-400' :
+                dryRunResult.summary.success_rate >= 60 ? 'bg-yellow-300' :
+                'bg-red-400'
               }`}
               style={{ width: `${dryRunResult.summary.success_rate}%` }}
             />
@@ -924,11 +924,11 @@ function DryRunResultsView({
 
         {/* Migration Readiness */}
         <div className="flex items-center gap-4">
-          <span className="text-sm font-medium text-slate-700">Migration Readiness:</span>
+          <span className="text-sm font-medium text-white/80">Migration Readiness:</span>
           <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-            dryRunResult.summary.migration_readiness === 'ready' ? 'bg-green-100 text-green-800' :
-            dryRunResult.summary.migration_readiness === 'needs_minor_fixes' ? 'bg-yellow-100 text-yellow-800' :
-            'bg-red-100 text-red-800'
+            dryRunResult.summary.migration_readiness === 'ready' ? 'bg-white/10 text-green-300' :
+            dryRunResult.summary.migration_readiness === 'needs_minor_fixes' ? 'bg-white/10 text-yellow-300' :
+            'bg-white/10 text-red-300'
           }`}>
             {dryRunResult.summary.migration_readiness.replace('_', ' ')}
           </span>
@@ -937,16 +937,16 @@ function DryRunResultsView({
 
       {/* Job Results */}
       <div className="flex-1 overflow-y-auto p-6">
-        <h3 className="font-semibold text-slate-900 mb-4">Job Results</h3>
+        <h3 className="font-semibold text-white mb-4">Job Results</h3>
         
         <div className="space-y-3">
           {dryRunResult.logs.map((job: JobLog) => (
             <div
               key={job.job_name}
-              className="bg-white rounded-lg border border-slate-200 overflow-hidden"
+              className="bg-white/5 rounded-lg border border-white/10 overflow-hidden"
             >
               <div
-                className="p-4 cursor-pointer hover:bg-slate-50 transition-colors"
+                className="p-4 cursor-pointer hover:bg-white/5 transition-colors"
                 onClick={() => setExpandedJob(
                   expandedJob === job.job_name ? null : job.job_name
                 )}
@@ -954,14 +954,14 @@ function DryRunResultsView({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className={`w-3 h-3 rounded-full ${
-                      job.status === 'success' ? 'bg-green-500' :
-                      job.status === 'failed' ? 'bg-red-500' :
-                      'bg-yellow-500'
+                      job.status === 'success' ? 'bg-green-400' :
+                      job.status === 'failed' ? 'bg-red-400' :
+                      'bg-yellow-300'
                     }`} />
                     
                     <div>
-                      <h4 className="font-semibold text-slate-900">{job.job_name}</h4>
-                      <div className="flex items-center gap-4 text-sm text-slate-500">
+                      <h4 className="font-semibold text-white">{job.job_name}</h4>
+                      <div className="flex items-center gap-4 text-sm text-white/60">
                         <span>Duration: {job.duration}s</span>
                         {job.warnings.length > 0 && (
                           <span>{job.warnings.length} warnings</span>
@@ -972,28 +972,28 @@ function DryRunResultsView({
                   
                   <div className="flex items-center gap-2">
                     <span className={`px-2 py-1 rounded text-xs font-medium ${
-                      job.status === 'success' ? 'bg-green-100 text-green-800' :
-                      job.status === 'failed' ? 'bg-red-100 text-red-800' :
-                      'bg-yellow-100 text-yellow-800'
+                      job.status === 'success' ? 'bg-white/10 text-green-300' :
+                      job.status === 'failed' ? 'bg-white/10 text-red-300' :
+                      'bg-white/10 text-yellow-300'
                     }`}>
                       {job.status}
                     </span>
                     {expandedJob === job.job_name ? (
-                      <ChevronDown className="w-4 h-4 text-slate-400" />
+                      <ChevronDown className="w-4 h-4 text-white/50" />
                     ) : (
-                      <ChevronRight className="w-4 h-4 text-slate-400" />
+                      <ChevronRight className="w-4 h-4 text-white/50" />
                     )}
                   </div>
                 </div>
               </div>
 
               {expandedJob === job.job_name && (
-                <div className="border-t border-slate-200 p-4 bg-slate-50">
+                <div className="border-t border-white/10 p-4 bg-white/5">
                   <div className="space-y-4">
                     {job.error_message && (
                       <div>
-                        <h5 className="font-medium text-red-900 mb-2">Error Message</h5>
-                        <p className="text-sm text-red-700 bg-red-50 p-3 rounded border border-red-200">
+                        <h5 className="font-medium text-red-300 mb-2">Error Message</h5>
+                        <p className="text-sm text-red-200 bg-white/5 p-3 rounded border border-white/10">
                           {job.error_message}
                         </p>
                       </div>
@@ -1001,10 +1001,10 @@ function DryRunResultsView({
 
                     {job.warnings.length > 0 && (
                       <div>
-                        <h5 className="font-medium text-yellow-900 mb-2">Warnings</h5>
+                        <h5 className="font-medium text-yellow-300 mb-2">Warnings</h5>
                         <div className="space-y-1">
                           {job.warnings.map((warning, index) => (
-                            <p key={index} className="text-sm text-yellow-700 bg-yellow-50 p-2 rounded border border-yellow-200">
+                            <p key={index} className="text-sm text-yellow-200 bg-white/5 p-2 rounded border border-white/10">
                               {warning}
                             </p>
                           ))}
@@ -1014,16 +1014,16 @@ function DryRunResultsView({
 
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <h5 className="font-medium text-slate-900">Job Logs</h5>
+                        <h5 className="font-medium text-white">Job Logs</h5>
                         <button
                           onClick={() => copyToClipboard(job.log_content)}
-                          className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                          className="text-sm text-white hover:text-white/80 flex items-center gap-1"
                         >
                           <Copy className="w-3 h-3" />
                           Copy
                         </button>
                       </div>
-                      <pre className="text-sm text-slate-700 bg-white p-3 rounded border border-slate-200 overflow-x-auto max-h-64">
+                       <pre className="text-sm text-white/80 bg-black p-3 rounded border border-white/10 overflow-x-auto max-h-64">
                         {job.log_content.substring(0, 2000)}
                         {job.log_content.length > 2000 && '\n... [truncated]'}
                       </pre>
@@ -1038,18 +1038,18 @@ function DryRunResultsView({
         {/* Manual Steps */}
         {dryRunResult.manual_steps.length > 0 && (
           <div className="mt-8">
-            <h3 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
-              <List className="w-4 h-4 text-blue-600" />
+            <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
+              <List className="w-4 h-4 text-white" />
               Manual Steps Required
             </h3>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="bg-white/5 border border-white/10 rounded-lg p-4">
               <div className="space-y-2">
                 {dryRunResult.manual_steps.map((step: string, index: number) => (
                   <div key={index} className="flex items-start gap-2">
-                    <div className="w-6 h-6 bg-blue-600 text-white text-xs rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">
+                    <div className="w-6 h-6 bg-white/20 text-white text-xs rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">
                       {index + 1}
                     </div>
-                    <p className="text-sm text-blue-800">{step}</p>
+                    <p className="text-sm text-white/80">{step}</p>
                   </div>
                 ))}
               </div>
@@ -1102,7 +1102,7 @@ function GitLabCIView({
           </p>
           <button
             onClick={onGenerate}
-            className="btn-primary flex items-center gap-2"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-white text-black hover:bg-white/90"
           >
             <GitBranch className="w-4 h-4" />
             Generate GitLab CI
@@ -1144,14 +1144,14 @@ function GitLabCIView({
           <div className="flex items-center gap-3">
             <button
               onClick={() => copyToClipboard(gitlabYaml)}
-              className="btn-secondary flex items-center gap-2"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-white/10 bg-white/5 text-white hover:bg-white/10"
             >
               <Copy className="w-4 h-4" />
               Copy
             </button>
             <button
               onClick={downloadYaml}
-              className="btn-primary flex items-center gap-2"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-white text-black hover:bg-white/90"
             >
               <Download className="w-4 h-4" />
               Download

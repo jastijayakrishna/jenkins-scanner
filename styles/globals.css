@@ -15,20 +15,20 @@
   --system-gray6: #F2F2F7;
   
   /* Semantic Design Tokens */
-  --bg-primary: #ffffff;
-  --bg-secondary: var(--system-gray6);
-  --bg-tertiary: var(--system-gray5);
-  --bg-card: rgba(255, 255, 255, 0.95);
-  --bg-overlay: rgba(0, 122, 255, 0.15);
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #111111;
+  --bg-tertiary: #161616;
+  --bg-card: rgba(255, 255, 255, 0.02);
+  --bg-overlay: rgba(255, 255, 255, 0.06);
   
   --border-primary: var(--system-gray4);
   --border-secondary: var(--system-gray3);
   --border-focus: var(--system-blue);
   
-  --text-primary: #1D1D1F;    /* Primary text color */
-  --text-secondary: #86868B;  /* Secondary text color */
-  --text-muted: var(--system-gray);
-  --text-link: var(--system-blue);
+  --text-primary: #ffffff;
+  --text-secondary: #c9c9c9;
+  --text-muted: #9a9a9a;
+  --text-link: #ffffff;
   
   --accent-primary: var(--system-blue);
   --accent-secondary: #0051D5;
@@ -37,8 +37,8 @@
   --accent-error: #FF3B30;
   
   /* Glass morphism effects */
-  --glass-bg: rgba(255, 255, 255, 0.8);
-  --glass-border: rgba(255, 255, 255, 0.2);
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
   --glass-backdrop: blur(20px) saturate(1.8);
   
   /* Shadow system */
@@ -182,19 +182,7 @@ a:focus {
 }
 
 /* Button focus states for accessibility */
-.btn-primary:focus,
-.btn-secondary:focus,
-.btn-error:focus {
-  outline: none;
-  box-shadow: 0 0 0 4px var(--system-blue-light), var(--shadow-3);
-}
-
-.btn-primary:focus-visible,
-.btn-secondary:focus-visible,
-.btn-error:focus-visible {
-  outline: 2px solid var(--border-focus);
-  outline-offset: 2px;
-}
+/* Legacy button focus styles removed in favor of shadcn components */
 
 .error-card {
   background: #fef2f2;
@@ -292,64 +280,9 @@ a:focus {
   animation: subtle-bounce 0.6s var(--easing-standard);
 }
 
-/* Professional button system with consistent styling */
-.btn-primary {
-  background: var(--accent-primary);
-  color: white;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
-  font-weight: 590; /* SF Pro semibold */
-  font-size: 17px;
-  line-height: 1.23529;
-  letter-spacing: -0.022em;
-  padding: var(--spacing-3) var(--spacing-6);
-  border-radius: 10px; /* Standard button corner radius */
-  border: none;
-  box-shadow: var(--shadow-2);
-  transition: all var(--duration-medium) var(--easing-standard);
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
+/* Legacy .btn-primary removed */
 
-.btn-primary:hover {
-  background: var(--accent-secondary);
-  box-shadow: var(--shadow-3);
-  transform: translateY(-1px) scale(1.02);
-}
-
-.btn-primary:active {
-  transform: translateY(0) scale(0.98);
-  transition-duration: var(--duration-short);
-}
-
-.btn-secondary {
-  background: var(--bg-card);
-  color: var(--text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
-  font-weight: 510; /* SF Pro medium */
-  font-size: 17px;
-  line-height: 1.23529;
-  letter-spacing: -0.022em;
-  padding: var(--spacing-3) var(--spacing-6);
-  border-radius: 10px;
-  border: 1px solid var(--border-primary);
-  box-shadow: var(--shadow-1);
-  transition: all var(--duration-medium) var(--easing-standard);
-  cursor: pointer;
-  backdrop-filter: var(--glass-backdrop);
-}
-
-.btn-secondary:hover {
-  background: var(--bg-secondary);
-  border-color: var(--border-focus);
-  box-shadow: var(--shadow-2);
-  transform: translateY(-1px) scale(1.02);
-}
-
-.btn-secondary:active {
-  transform: translateY(0) scale(0.98);
-  transition-duration: var(--duration-short);
-}
+/* Legacy .btn-secondary removed */
 
 .btn-error {
   background: var(--accent-error);

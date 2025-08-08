@@ -115,12 +115,24 @@ cd jenkins-scanner
 npm install
 ```
 
-3. Run the development server:
+3. Configure environment variables:
+```bash
+# Create .env.local file
+cp .env.example .env.local
+
+# Add your API keys
+ANTHROPIC_API_KEY=your_claude_api_key_here
+GITLAB_TOKEN=your_gitlab_token_here
+GITLAB_SANDBOX_NAMESPACE=your_sandbox_namespace
+DATABASE_URL=your_postgresql_connection_string
+```
+
+4. Run the development server:
 ```bash
 npm run dev
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
 ## 🎯 Usage
 

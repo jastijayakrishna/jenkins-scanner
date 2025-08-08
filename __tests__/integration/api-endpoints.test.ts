@@ -491,7 +491,7 @@ test-job:
         headers: {
           'content-type': 'text/plain'
         },
-        body: 'plain text content'
+        body: 'plain text content' as any
       })
 
       await convertHandler(req, res)
@@ -513,7 +513,7 @@ test-job:
 
       const responses = await Promise.all(requests)
       
-      responses.forEach(res => {
+      responses.forEach((res: any) => {
         expect(res._getStatusCode()).toBe(200)
         const data = JSON.parse(res._getData())
         expect(data.success).toBe(true)

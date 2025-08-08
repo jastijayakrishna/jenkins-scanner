@@ -163,7 +163,7 @@ package:docker:
       // Check timing
       expect(result.started_at).toBeInstanceOf(Date)
       expect(result.completed_at).toBeInstanceOf(Date)
-      expect(result.completed_at.getTime()).toBeGreaterThan(result.started_at.getTime())
+      expect(result.completed_at!.getTime()).toBeGreaterThan(result.started_at.getTime())
     }, 15000)
 
     test('should extract jobs from GitLab YAML correctly', async () => {
@@ -412,9 +412,9 @@ failing-job:
 
       expect(result.started_at).toBeInstanceOf(Date)
       expect(result.completed_at).toBeInstanceOf(Date)
-      expect(result.completed_at.getTime()).toBeGreaterThan(result.started_at.getTime())
+      expect(result.completed_at!.getTime()).toBeGreaterThan(result.started_at.getTime())
       
-      const duration = result.completed_at.getTime() - result.started_at.getTime()
+      const duration = result.completed_at!.getTime() - result.started_at.getTime()
       expect(duration).toBeGreaterThan(0)
       expect(duration).toBeLessThan(60000) // Should complete within 1 minute
     })
@@ -497,7 +497,7 @@ quick-job:
 
       expect(result.total_jobs).toBe(1)
       expect(result.logs[0].duration).toBeGreaterThanOrEqual(0)
-      expect(result.completed_at.getTime() - result.started_at.getTime()).toBeGreaterThan(0)
+      expect(result.completed_at!.getTime() - result.started_at.getTime()).toBeGreaterThan(0)
     })
   })
 })

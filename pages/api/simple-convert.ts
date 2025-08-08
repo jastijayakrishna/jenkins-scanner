@@ -30,8 +30,11 @@ export default async function handler(
   try {
     const { jenkinsContent, scanResult } = req.body as SimpleConversionRequest
 
+    if (jenkinsContent === undefined) {
+      return res.status(400).json({ success: false, error: 'jenkinsContent is required' })
+    }
     if (!jenkinsContent) {
-      return res.status(400).json({ success: false, error: 'Jenkins content is required' })
+      return res.status(400).json({ success: false, error: 'jenkinsContent is required' })
     }
 
     // Generate enterprise GitLab CI template using AI

@@ -394,59 +394,21 @@ export class GitLabDryRunEngine {
    * Enhance results with AI analysis
    */
   private static async enhanceResultsWithAI(dryRunResult: DryRunResult): Promise<void> {
-    const aiPrompt = `Analyze this GitLab CI dry-run result and provide actionable insights:
-
-**Pipeline Status:** ${dryRunResult.status}
-**Jobs:** ${dryRunResult.passed_jobs}/${dryRunResult.total_jobs} passed
-**Failed Jobs:** ${dryRunResult.failed_jobs}
-
-**Warnings:**
-${dryRunResult.warnings.slice(0, 5).join('\n')}
-
-**Error Logs (sample):**
-${dryRunResult.logs.filter(log => log.status === 'failed').slice(0, 2).map(log => 
-  `${log.job_name}: ${log.error_message || 'No error message'}`).join('\n')}
-
-Provide a JSON response with:
-{
-  "severity": "low|medium|high",
-  "key_issues": ["list of main problems"],
-  "recommended_actions": ["list of specific actions"],
-  "migration_readiness": "ready|needs_work|blocked"
-}
-
-Focus on practical, actionable guidance for DevOps teams.`
-
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': process.env.ANTHROPIC_API_KEY || '',
-          'anthropic-version': '2023-06-01'
-        },
-        body: JSON.stringify({
-          model: 'claude-3-sonnet-20240229',
-          max_tokens: 1000,
-          messages: [{
-            role: 'user',
-            content: aiPrompt
-          }]
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error(`AI API request failed: ${response.status}`)
-      }
-
-      const data = await response.json()
-      const aiAnalysis = JSON.parse(data.content[0].text)
+      // Import and use the real AI service
+      const { EnterpriseAIService } = await import('./ai-service')
+      
+      const aiAnalysis = await EnterpriseAIService.analyzeDryRunResults(
+        dryRunResult,
+        dryRunResult.jenkins_content
+      )
       
       // Add AI insights to manual steps
       dryRunResult.manual_steps.push(
         '--- AI Analysis ---',
         `Migration Readiness: ${aiAnalysis.migration_readiness}`,
         `Severity: ${aiAnalysis.severity}`,
+        `Confidence: ${Math.round(aiAnalysis.confidence * 100)}%`,
         ...aiAnalysis.key_issues.map((issue: string) => `⚠️ ${issue}`),
         ...aiAnalysis.recommended_actions.map((action: string) => `✅ ${action}`)
       )

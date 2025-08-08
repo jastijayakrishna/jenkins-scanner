@@ -7,12 +7,6 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   // Windows-specific file system optimizations
-  experimental: {
-    // Turbopack for faster builds
-    turbo: {
-      // Add turbo-specific rules if needed
-    },
-  },
   webpack: (config, { dev }) => {
     if (dev) {
       // Disable symlink watching on Windows

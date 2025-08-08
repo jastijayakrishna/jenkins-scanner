@@ -129,29 +129,7 @@ export default function EnterpriseDashboard({
   )
 
   // Start plugin analysis on component mount
-  useEffect(() => {
-    startPluginAnalysis()
-  }, [])
-
-  // Auto-refresh for real-time updates
-  useEffect(() => {
-    if (!autoRefresh) return
-
-    const interval = setInterval(() => {
-      setLastUpdate(new Date())
-      // Refresh dry-run status if running
-      if (isRunningDryRun && dryRunResult) {
-        refreshDryRunStatus()
-      }
-    }, 10000) // 10 seconds
-
-    return () => clearInterval(interval)
-  }, [autoRefresh, isRunningDryRun, dryRunResult])
-
-  /**
-   * Start plugin compatibility analysis
-   */
-  const startPluginAnalysis = async () => {
+  const startPluginAnalysis = useCallback(async () => {
     setIsAnalyzing(true)
     setError(null)
 
@@ -187,7 +165,50 @@ export default function EnterpriseDashboard({
     } finally {
       setIsAnalyzing(false)
     }
-  }
+  }, [jenkinsContent, projectId])
+
+  useEffect(() => {
+    startPluginAnalysis()
+  }, [startPluginAnalysis])
+
+  /**
+   * Refresh dry-run status
+   */
+  const refreshDryRunStatus = useCallback(async () => {
+    if (!dryRunResult) return
+
+    try {
+      const response = await fetch(`/api/dry-run?dryRunId=${dryRunResult.id}`)
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success && data.data) {
+          // Update status if changed
+          setDryRunResult(prev => (prev ? { ...prev, ...data.data } : null))
+        }
+      }
+    } catch (error) {
+      console.error('Failed to refresh dry-run status:', error)
+    }
+  }, [dryRunResult])
+
+  // Auto-refresh for real-time updates
+  useEffect(() => {
+    if (!autoRefresh) return
+
+    const interval = setInterval(() => {
+      setLastUpdate(new Date())
+      // Refresh dry-run status if running
+      if (isRunningDryRun && dryRunResult) {
+        refreshDryRunStatus()
+      }
+    }, 10000) // 10 seconds
+
+    return () => clearInterval(interval)
+  }, [autoRefresh, isRunningDryRun, dryRunResult, refreshDryRunStatus])
+
+  /**
+   * Start plugin compatibility analysis
+   */
 
   /**
    * Generate GitLab YAML and start dry-run
@@ -302,22 +323,6 @@ test:
   /**
    * Refresh dry-run status
    */
-  const refreshDryRunStatus = async () => {
-    if (!dryRunResult) return
-
-    try {
-      const response = await fetch(`/api/dry-run?dryRunId=${dryRunResult.id}`)
-      if (response.ok) {
-        const data = await response.json()
-        if (data.success && data.data) {
-          // Update status if changed
-          setDryRunResult(prev => prev ? { ...prev, ...data.data } : null)
-        }
-      }
-    } catch (error) {
-      console.error('Failed to refresh dry-run status:', error)
-    }
-  }
 
   /**
    * Filter plugins based on current filter and search

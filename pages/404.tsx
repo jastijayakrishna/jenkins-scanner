@@ -1,4 +1,5 @@
 import Head from 'next/head'
+import Link from 'next/link'
 import { AlertCircle } from 'lucide-react'
 
 export default function Custom404() {
@@ -20,15 +21,15 @@ export default function Custom404() {
           </h2>
           
           <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
-            The page you're looking for doesn't exist. It might have been moved or deleted.
+            The page you’re looking for doesn’t exist. It might have been moved or deleted.
           </p>
           
-          <a
+          <Link
             href="/"
             className="inline-flex items-center px-6 py-3 text-base font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 transition-colors"
           >
             Go back home
-          </a>
+          </Link>
         </div>
       </div>
     </>

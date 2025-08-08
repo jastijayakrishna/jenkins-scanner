@@ -79,7 +79,7 @@ export class ErrorBoundary extends Component<Props, State> {
               </h1>
               
               <p className="mt-2 text-sm text-center text-gray-600">
-                We're sorry, but something unexpected happened. Please try refreshing the page.
+                We’re sorry, but something unexpected happened. Please try refreshing the page.
               </p>
               
               {process.env.NODE_ENV === 'development' && this.state.error && (

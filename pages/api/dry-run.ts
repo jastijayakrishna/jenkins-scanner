@@ -251,14 +251,23 @@ function validateGitLabYaml(yamlContent: string): { valid: boolean; error?: stri
     // Check for at least one of the basic GitLab CI structures
     const hasStages = yamlContent.includes('stages:') || yamlContent.includes('stage:')
     const hasScript = yamlContent.includes('script:') || yamlContent.includes('include:')
-    const hasJob = yamlContent.match(/^[a-zA-Z0-9_-]+:/m) // Any job definition
+    // Require valid job keys (not top-level reserved keys)
+    const reserved = new Set(['stages', 'variables', 'include', 'workflow', 'default', 'image', 'services'])
+    let hasJob = false
+    const jobRegex = /^([a-zA-Z0-9_-]+):\s*$/m
+    const lines = yamlContent.split('\n')
+    for (const line of lines) {
+      const m = line.match(jobRegex)
+      if (m && !reserved.has(m[1])) { hasJob = true; break }
+    }
     
     if (!hasStages && !hasScript && !hasJob) {
       return { valid: false, error: 'No valid GitLab CI structure found (no stages, scripts, or jobs)' }
     }
     
     // Only check for obvious syntax errors
-    const lines = yamlContent.split('\n')
+    // Only check for obvious syntax errors
+    // Reuse lines from above
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]
       

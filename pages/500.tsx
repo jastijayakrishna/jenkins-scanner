@@ -1,4 +1,5 @@
 import Head from 'next/head'
+import Link from 'next/link'
 import { AlertTriangle } from 'lucide-react'
 
 export default function Custom500() {
@@ -20,7 +21,7 @@ export default function Custom500() {
           </h2>
           
           <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
-            Something went wrong on our servers. We're working to fix the issue. Please try again later.
+            Something went wrong on our servers. We’re working to fix the issue. Please try again later.
           </p>
           
           <div className="space-x-4">
@@ -30,12 +31,12 @@ export default function Custom500() {
             >
               Try again
             </button>
-            <a
+            <Link
               href="/"
               className="inline-flex items-center px-6 py-3 text-base font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
             >
               Go home
-            </a>
+            </Link>
           </div>
         </div>
       </div>

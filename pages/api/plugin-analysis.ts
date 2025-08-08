@@ -39,14 +39,11 @@ export default async function handler(
   }
   
   try {
-    const { jenkinsContent, projectId, userId } = req.body as PluginAnalysisRequest
+    const { jenkinsContent, projectId, userId } = (req.body || {}) as PluginAnalysisRequest
     
     // Validate required fields
-    if (!jenkinsContent) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Jenkins content is required' 
-      })
+    if (jenkinsContent === undefined) {
+      return res.status(400).json({ success: false, error: 'jenkinsContent is required' })
     }
     
     // Generate unique project ID if not provided
@@ -54,11 +51,23 @@ export default async function handler(
     const finalUserId = userId || 'anonymous'
     
     // Validate Jenkins content
-    if (jenkinsContent.length < 10) {
-      return res.status(400).json({
-        success: false,
-        error: 'Jenkins content appears to be too short or invalid'
-      })
+    // For empty content, return a valid empty analysis instead of 400
+    if (jenkinsContent.length < 1) {
+      const emptyResult: PluginScanResult = {
+        id: '',
+        project_id: projectId || `project-${Date.now()}`,
+        jenkins_content: jenkinsContent,
+        scanned_at: new Date(),
+        total_plugins: 0,
+        compatible_plugins: 0,
+        partial_plugins: 0,
+        unsupported_plugins: 0,
+        blocking_issues: 0,
+        plugins: [],
+        ai_recommendations: [],
+        created_by: userId || 'anonymous'
+      }
+      return res.status(200).json({ success: true, data: emptyResult })
     }
     
     if (jenkinsContent.length > 1000000) { // 1MB limit

@@ -2,7 +2,12 @@
 import React, { useCallback, useState, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { UploadCloud, FileText } from 'lucide-react';
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
 import { scan, scoreVersion } from '@/lib/score';
+import { cn } from '@/components/ui/utils';
 
 /**
  * Dropzone component for uploading and scanning Jenkinsfiles.
@@ -93,20 +98,17 @@ export default function Dropzone({ onScan }: DropzoneProps) {
   };
 
   return (
-    <div
+    <Card
       {...getRootProps()}
-      className={`
-        group relative mx-auto flex max-w-xl flex-col items-center
-        justify-center rounded-3xl border-2 border-dashed p-12 text-center
-        transition-all duration-300 cursor-pointer focus-within:outline-none
-        ${isDragActive ? 'dropzone-active' : 'dropzone-idle'}
-        ${isDragAccept ? 'border-green-500 bg-green-50' : ''}
-        ${isDragReject ? 'border-red-500 bg-red-50' : ''}
-      `}
-      style={{
-        transition: 'all var(--duration-medium) var(--easing-standard)'
-      }}
-      onFocus={() => console.log('Dropzone focused')}
+      className={cn(
+        "group relative mx-auto flex max-w-xl flex-col items-center",
+        "justify-center border-2 border-dashed p-12 text-center",
+        "transition-all duration-300 cursor-pointer focus-within:outline-none",
+        "hover:bg-accent/5 hover:border-accent",
+        isDragActive && "border-primary bg-primary/5",
+        isDragAccept && "border-green-500 bg-green-50/10",
+        isDragReject && "border-destructive bg-destructive/5"
+      )}
       tabIndex={0}
       role="button"
       aria-label="Upload Jenkinsfile"
@@ -118,24 +120,19 @@ export default function Dropzone({ onScan }: DropzoneProps) {
         className="sr-only focus:outline-none"
       />
 
-      {/* animated gradient halo (hidden until drag-over) */}
+      {/* Animated gradient effect */}
       <div
-        className={`
-          pointer-events-none absolute inset-0 -z-10 rounded-3xl opacity-0
-          blur-2xl transition-opacity duration-300
-          group-hover:opacity-70
-          ${isDragActive ? 'animate-fade-in-slow opacity-90' : ''}
-          before:absolute before:inset-0 before:rounded-3xl
-          before:bg-gradient-to-r before:from-brand-400 before:to-brand-600
-        `}
+        className={cn(
+          "pointer-events-none absolute inset-0 -z-10 rounded-lg opacity-0",
+          "blur-2xl transition-opacity duration-300",
+          "group-hover:opacity-20",
+          isDragActive && "opacity-30",
+          "bg-gradient-to-r from-primary/20 to-accent/20"
+        )}
       />
 
-      {/* icon */}
-      <div className="mb-6 rounded-full p-4 transition-all duration-300" 
-           style={{
-             background: 'var(--system-blue-light)',
-             color: 'var(--accent-primary)'
-           }}
+      {/* Icon */}
+      <div className="mb-6 rounded-full bg-primary/10 p-4 text-primary transition-all duration-300 group-hover:scale-105" 
            aria-hidden="true">
         {fileMeta ? (
           <FileText className="h-10 w-10 transition-transform duration-300 group-hover:scale-110" />
@@ -144,62 +141,41 @@ export default function Dropzone({ onScan }: DropzoneProps) {
         )}
       </div>
 
-      {/* instructions or file meta */}
+      {/* Content */}
       {fileMeta ? (
         <div className="space-y-2">
-          <p className="text-lg font-medium" style={{
-            fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif',
-            fontWeight: 590,
-            letterSpacing: '-0.022em',
-            color: 'var(--text-primary)'
-          }}>
+          <h3 className="text-lg font-semibold text-foreground">
             {fileMeta.name}
-          </p>
-          <p className="text-sm" style={{
-            fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif',
-            fontWeight: 400,
-            letterSpacing: '-0.022em',
-            color: 'var(--text-secondary)',
-            lineHeight: 1.47058823529
-          }}>
-            {(fileMeta.size / 1024).toFixed(1)} KB — drag a new file to replace
+          </h3>
+          <div className="flex items-center justify-center gap-2">
+            <Badge variant="secondary">
+              {(fileMeta.size / 1024).toFixed(1)} KB
+            </Badge>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Drag a new file to replace
           </p>
         </div>
       ) : (
         <>
-          <p className="text-lg font-medium" style={{
-            fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif',
-            fontWeight: 590,
-            letterSpacing: '-0.022em',
-            color: 'var(--text-primary)'
-          }}>
-            Drag & drop your&nbsp;<span style={{ color: 'var(--accent-primary)' }}>Jenkinsfile</span>
+          <h3 className="text-lg font-semibold text-foreground">
+            Drag & drop your <span className="text-primary">Jenkinsfile</span>
+          </h3>
+          <p className="mt-3 text-sm text-muted-foreground">
+            …or click anywhere to browse (max 2 MB)
           </p>
-          <p className="mt-3 text-sm" style={{
-            fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif',
-            fontWeight: 400,
-            letterSpacing: '-0.022em',
-            color: 'var(--text-secondary)',
-            lineHeight: 1.47058823529
-          }}>
-            …or&nbsp;click anywhere to browse (max 2 MB)
-          </p>
-          <button
-            type="button"
-            onClick={handleBrowseClick}
-            className="mt-4 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg 
-                     text-sm font-medium transition-colors focus:outline-none focus:ring-2 
-                     focus:ring-brand-500 focus:ring-offset-2"
-          >
+          <Button onClick={handleBrowseClick} className="mt-4" variant="default">
             Browse Files
-          </button>
+          </Button>
         </>
       )}
       {error && (
-        <div className="mt-2 text-sm text-red-500" role="alert">
-          {error}
-        </div>
+        <Alert variant="destructive" className="mt-4">
+          <AlertDescription>
+            {error}
+          </AlertDescription>
+        </Alert>
       )}
-    </div>
+    </Card>
   );
 }

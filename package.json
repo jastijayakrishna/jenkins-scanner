@@ -5,7 +5,10 @@
   "scripts": {
     "dev": "next dev",
     "dev:clean": "rm -rf .next && npm run dev",
+    "dev:reset": "rm -rf .next && rm -rf node_modules/.cache && npm cache clean --force && npm run dev",
+    "dev:fresh": "rm -rf .next && npm run build && npm run dev",
     "build": "next build",
+    "build:clean": "rm -rf .next && npm run build",
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
@@ -28,7 +31,12 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.3.8",
-    "tailwind-merge": "^3.3.1"
+    "tailwind-merge": "^3.3.1",
+    "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-progress": "^1.0.3",
+    "@radix-ui/react-dialog": "^1.0.5",
+    "@radix-ui/react-tabs": "^1.0.4",
+    "class-variance-authority": "^0.7.0"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",

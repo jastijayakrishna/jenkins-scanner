@@ -67,27 +67,27 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="min-h-screen flex items-center justify-center bg-black text-white">
           <div className="max-w-md w-full p-6">
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full">
-                <AlertTriangle className="w-6 h-6 text-red-600" />
+            <div className="rounded-lg p-6 border border-white/10 bg-white/5">
+              <div className="flex items-center justify-center w-12 h-12 mx-auto bg-white/10 rounded-full">
+                <AlertTriangle className="w-6 h-6 text-white" />
               </div>
               
-              <h1 className="mt-4 text-xl font-semibold text-center text-gray-900">
+              <h1 className="mt-4 text-xl font-semibold text-center">
                 Something went wrong
               </h1>
               
-              <p className="mt-2 text-sm text-center text-gray-600">
+              <p className="mt-2 text-sm text-center text-white/80">
                 We’re sorry, but something unexpected happened. Please try refreshing the page.
               </p>
               
               {process.env.NODE_ENV === 'development' && this.state.error && (
-                <details className="mt-4 p-4 bg-gray-100 rounded text-xs">
-                  <summary className="cursor-pointer text-gray-700">
+                <details className="mt-4 p-4 bg-white/5 border border-white/10 rounded text-xs">
+                  <summary className="cursor-pointer text-white/80">
                     Error details (development only)
                   </summary>
-                  <pre className="mt-2 whitespace-pre-wrap text-red-600">
+                  <pre className="mt-2 whitespace-pre-wrap text-red-300">
                     {this.state.error.toString()}
                     {this.state.errorInfo && this.state.errorInfo.componentStack}
                   </pre>
@@ -97,7 +97,7 @@ export class ErrorBoundary extends Component<Props, State> {
               <div className="mt-6">
                 <button
                   onClick={() => window.location.reload()}
-                  className="w-full px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
+                  className="w-full px-4 py-2 text-sm font-medium text-black bg-white rounded-md hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white"
                 >
                   Refresh page
                 </button>

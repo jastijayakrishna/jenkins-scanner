@@ -4,8 +4,10 @@ import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <ErrorBoundary>
-      <Component {...pageProps} />
-    </ErrorBoundary>
+    <div className="dark bg-background text-foreground min-h-screen">
+      <ErrorBoundary>
+        <Component {...pageProps} />
+      </ErrorBoundary>
+    </div>
   )
 }

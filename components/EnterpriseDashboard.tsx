@@ -374,10 +374,10 @@ test:
    */
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'compatible': return 'text-green-300 bg-white/5 border-white/10'
-      case 'partial': return 'text-yellow-300 bg-white/5 border-white/10'
-      case 'unsupported': return 'text-red-300 bg-white/5 border-white/10'
-      default: return 'text-white/70 bg-white/5 border-white/10'
+      case 'compatible': return 'text-green-400 bg-green-500/10 border-green-500/20'
+      case 'partial': return 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20'
+      case 'unsupported': return 'text-red-400 bg-destructive/10 border-destructive/20'
+      default: return 'text-muted-foreground bg-muted/50 border-border'
     }
   }
 
@@ -395,20 +395,20 @@ test:
 
   if (error && !pluginAnalysis && !dryRunResult) {
     return (
-      <div className="fixed inset-0 z-50 bg-white">
+      <div className="fixed inset-0 z-50 bg-background">
         <div className="flex items-center justify-center h-full">
           <div className="text-center space-y-6 max-w-md p-8">
-            <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center mx-auto">
-              <AlertTriangle className="w-8 h-8 text-white" />
+            <div className="w-16 h-16 bg-destructive rounded-full flex items-center justify-center mx-auto">
+              <AlertTriangle className="w-8 h-8 text-destructive-foreground" />
             </div>
-            <h2 className="text-xl font-bold text-red-900">Analysis Failed</h2>
-            <p className="text-red-800 font-medium">{error}</p>
+            <h2 className="text-xl font-bold text-destructive">Analysis Failed</h2>
+            <p className="text-destructive font-medium">{error}</p>
             <div className="flex gap-4 justify-center">
-              <button onClick={startPluginAnalysis} className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-white/10 bg-white/5 text-white hover:bg-white/10">
+              <button onClick={startPluginAnalysis} className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-border bg-secondary text-secondary-foreground hover:bg-secondary/80">
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Retry
               </button>
-              <button onClick={onClose} className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-white text-black hover:bg-white/90">
+              <button onClick={onClose} className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90">
                 Close
               </button>
             </div>
@@ -419,23 +419,23 @@ test:
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black text-white">
+    <div className="fixed inset-0 z-50 bg-slate-950 text-slate-100">
       
       {/* Header */}
-      <div className="h-20 border-b border-white/10 bg-black shadow-sm">
+      <div className="h-20 border-b border-slate-800 bg-slate-900 shadow-sm">
         <div className="h-full px-8 flex items-center justify-between">
           <div className="flex items-center gap-6">
             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-              <Activity className="w-6 h-6 text-white" />
+              <Activity className="w-6 h-6 text-slate-100" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+              <h1 className="text-2xl font-bold text-slate-100 flex items-center gap-3">
                 Enterprise Migration Dashboard
-                <span className="text-sm font-normal text-white/70 bg-white/10 px-2 py-1 rounded">
+                <span className="text-sm font-normal text-slate-400 bg-slate-800 px-2 py-1 rounded">
                   {projectId}
                 </span>
               </h1>
-              <p className="text-sm text-white/70 font-medium">
+              <p className="text-sm text-slate-400 font-medium">
                 Real-time plugin analysis and dry-run testing
               </p>
             </div>
@@ -447,8 +447,8 @@ test:
               onClick={() => setAutoRefresh(!autoRefresh)}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                   autoRefresh 
-                    ? 'bg-white/10 text-white border border-white/20' 
-                    : 'bg-white/5 text-white/70 border border-white/10'
+                    ? 'bg-slate-800 text-slate-100 border border-slate-600' 
+                    : 'bg-slate-800/50 text-slate-300 border border-slate-700'
                 }`}
             >
               <RefreshCw className={`w-4 h-4 ${autoRefresh ? 'animate-spin' : ''}`} />
@@ -458,7 +458,7 @@ test:
             {/* Close button */}
               <button
               onClick={onClose}
-                className="w-10 h-10 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 flex items-center justify-center transition-all duration-200 text-white"
+                className="w-10 h-10 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 flex items-center justify-center transition-all duration-200 text-slate-100"
             >
               <X className="w-5 h-5" />
             </button>
@@ -467,22 +467,22 @@ test:
       </div>
 
       {/* Tab Navigation */}
-      <div className="border-b border-white/10 bg-black">
+      <div className="border-b border-slate-800 bg-slate-950">
         <div className="px-8 py-4">
           <div className="flex items-center gap-6">
               <button
               onClick={() => setActiveTab('plugins')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
                   activeTab === 'plugins'
-                    ? 'bg-white/10 text-white'
-                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                    ? 'bg-slate-800 text-slate-100'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
                 }`}
             >
               <Shield className="w-4 h-4" />
               Plugin Compatibility
               {pluginAnalysis && (
                 <span className={`px-2 py-1 rounded text-xs ${
-                  activeTab === 'plugins' ? 'bg-white/20 text-white' : 'bg-white/10 text-white/70'
+                  activeTab === 'plugins' ? 'bg-slate-700 text-slate-100' : 'bg-slate-800 text-slate-300'
                 }`}>
                   {pluginAnalysis.total_plugins}
                 </span>
@@ -493,15 +493,15 @@ test:
               onClick={() => setActiveTab('dry-run')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
                   activeTab === 'dry-run'
-                    ? 'bg-white/10 text-white'
-                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                    ? 'bg-white/10 text-slate-100'
+                    : 'text-slate-100/70 hover:text-slate-100 hover:bg-white/5'
                 }`}
             >
               <Play className="w-4 h-4" />
               Dry-Run Results
               {dryRunResult && (
                 <span className={`px-2 py-1 rounded text-xs ${
-                  activeTab === 'dry-run' ? 'bg-white/20 text-white' : 
+                  activeTab === 'dry-run' ? 'bg-white/20 text-slate-100' : 
                   dryRunResult.status === 'success' ? 'bg-white/10 text-green-300' :
                   dryRunResult.status === 'failed' ? 'bg-white/10 text-red-300' :
                   'bg-white/10 text-yellow-300'
@@ -518,15 +518,15 @@ test:
               }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
                   activeTab === 'gitlab'
-                    ? 'bg-white/10 text-white'
-                    : 'text-white/70 hover:text-white hover:bg-white/5'
+                    ? 'bg-white/10 text-slate-100'
+                    : 'text-slate-100/70 hover:text-slate-100 hover:bg-white/5'
                 }`}
             >
               <GitBranch className="w-4 h-4" />
               GitLab CI
               {gitlabYaml && (
                 <span className={`px-2 py-1 rounded text-xs ${
-                  activeTab === 'gitlab' ? 'bg-white/20 text-white' : 'bg-white/10 text-green-300'
+                  activeTab === 'gitlab' ? 'bg-white/20 text-slate-100' : 'bg-white/10 text-green-300'
                 }`}>
                   Ready
                 </span>
@@ -537,7 +537,7 @@ test:
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 h-[calc(100vh-9rem)] overflow-hidden bg-black">
+      <div className="flex-1 h-[calc(100vh-9rem)] overflow-hidden bg-slate-950">
         {activeTab === 'plugins' && (
           <PluginCompatibilityView
             analysis={pluginAnalysis}
@@ -603,10 +603,10 @@ function PluginCompatibilityView({
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center space-y-6">
-          <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto" />
+          <div className="w-16 h-16 border-4 border-muted border-t-primary rounded-full animate-spin mx-auto" />
           <div>
-            <h3 className="text-xl font-bold text-slate-900">Analyzing Jenkins Plugins</h3>
-            <p className="text-slate-600 mt-2">AI-powered compatibility assessment in progress...</p>
+            <h3 className="text-xl font-bold text-foreground">Analyzing Jenkins Plugins</h3>
+            <p className="text-muted-foreground mt-2">AI-powered compatibility assessment in progress...</p>
           </div>
         </div>
       </div>
@@ -619,8 +619,8 @@ function PluginCompatibilityView({
           <div className="text-center space-y-6">
             <AlertTriangle className="w-16 h-16 text-yellow-300 mx-auto" />
           <div>
-              <h3 className="text-xl font-bold text-white">No Analysis Available</h3>
-              <p className="text-white/70 mt-2">Click retry to start plugin analysis</p>
+              <h3 className="text-xl font-bold text-foreground">No Analysis Available</h3>
+              <p className="text-muted-foreground mt-2">Click retry to start plugin analysis</p>
             <button onClick={onRetry} className="btn-primary mt-4">
               <RefreshCw className="w-4 h-4 mr-2" />
               Start Analysis
@@ -634,33 +634,33 @@ function PluginCompatibilityView({
   return (
     <div className="flex flex-col h-full">
       {/* Plugin Summary */}
-      <div className="p-6 bg-black border-b border-white/10">
+      <div className="p-6 bg-slate-950 border-b border-slate-800">
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
           <div className="text-center">
-            <div className="text-2xl font-bold text-white">{analysis.total_plugins}</div>
-            <div className="text-sm text-white/70">Total Plugins</div>
+            <div className="text-2xl font-bold text-slate-100">{analysis.total_plugins}</div>
+            <div className="text-sm text-slate-100/70">Total Plugins</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-green-300">{analysis.compatible_plugins}</div>
-            <div className="text-sm text-white/70">Compatible</div>
+            <div className="text-sm text-slate-100/70">Compatible</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-yellow-300">{analysis.partial_plugins}</div>
-            <div className="text-sm text-white/70">Partial</div>
+            <div className="text-sm text-slate-100/70">Partial</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-red-300">{analysis.unsupported_plugins}</div>
-            <div className="text-sm text-white/70">Unsupported</div>
+            <div className="text-sm text-slate-100/70">Unsupported</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-red-300">{analysis.blocking_issues}</div>
-            <div className="text-sm text-white/70">Blockers</div>
+            <div className="text-sm text-slate-100/70">Blockers</div>
           </div>
         </div>
 
         {/* Compatibility Score */}
         <div className="mb-4">
-          <div className="flex justify-between text-sm font-medium text-white/80 mb-2">
+          <div className="flex justify-between text-sm font-medium text-slate-100/80 mb-2">
             <span>Compatibility Score</span>
             <span>{analysis.performance.compatibility_score}%</span>
           </div>
@@ -678,24 +678,24 @@ function PluginCompatibilityView({
       </div>
 
       {/* Filters and Search */}
-      <div className="p-6 bg-black border-b border-white/10">
+      <div className="p-6 bg-slate-950 border-b border-slate-800">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/50" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-100/50" />
               <input
                 type="text"
                 placeholder="Search plugins..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-white/10 bg-white/5 text-sm rounded-lg focus:ring-2 focus:ring-white focus:border-transparent text-white placeholder:text-white/50"
+                className="pl-10 pr-4 py-2 border border-slate-800 bg-white/5 text-sm rounded-lg focus:ring-2 focus:ring-white focus:border-transparent text-slate-100 placeholder:text-slate-100/50"
               />
             </div>
 
             <select
               value={pluginFilter}
               onChange={(e) => setPluginFilter(e.target.value as any)}
-              className="px-3 py-2 border border-white/10 bg-white/5 text-white rounded-lg text-sm focus:ring-2 focus:ring-white focus:border-transparent"
+              className="px-3 py-2 border border-slate-800 bg-white/5 text-slate-100 rounded-lg text-sm focus:ring-2 focus:ring-white focus:border-transparent"
             >
               <option value="all">All Plugins</option>
               <option value="blocking">Blocking Issues</option>
@@ -704,7 +704,7 @@ function PluginCompatibilityView({
             </select>
           </div>
 
-          <div className="text-sm text-white/70">
+          <div className="text-sm text-slate-100/70">
             Showing {filteredPlugins.length} of {analysis.total_plugins} plugins
           </div>
         </div>
@@ -716,7 +716,7 @@ function PluginCompatibilityView({
           {filteredPlugins.map((plugin: PluginResult) => (
             <div
               key={`${plugin.plugin_name}-${plugin.line_number}`}
-              className="bg-white/5 text-white rounded border border-white/10 overflow-hidden hover:bg-white/10 transition-colors"
+              className="bg-white/5 text-slate-100 rounded border border-slate-800 overflow-hidden hover:bg-white/10 transition-colors"
             >
               <div
                 className="p-3 cursor-pointer hover:bg-white/5 transition-colors"
@@ -734,9 +734,9 @@ function PluginCompatibilityView({
                     
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-medium text-white text-sm truncate">{plugin.plugin_name}</h3>
+                        <h3 className="font-medium text-slate-100 text-sm truncate">{plugin.plugin_name}</h3>
                         {plugin.plugin_version && (
-                          <span className="text-xs text-white/60 flex-shrink-0">v{plugin.plugin_version}</span>
+                          <span className="text-xs text-slate-100/60 flex-shrink-0">v{plugin.plugin_version}</span>
                         )}
                         {plugin.is_blocking && (
                           <span className="px-1.5 py-0.5 bg-red-100 text-red-700 text-xs font-medium rounded flex-shrink-0">
@@ -748,35 +748,35 @@ function PluginCompatibilityView({
                   </div>
                   
                   <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                    <span className="text-xs text-white/60">Line {plugin.line_number}</span>
+                    <span className="text-xs text-slate-100/60">Line {plugin.line_number}</span>
                     {expandedPlugin === `${plugin.plugin_name}-${plugin.line_number}` ? (
-                      <ChevronDown className="w-4 h-4 text-white/50" />
+                      <ChevronDown className="w-4 h-4 text-slate-100/50" />
                     ) : (
-                      <ChevronRight className="w-4 h-4 text-white/50" />
+                      <ChevronRight className="w-4 h-4 text-slate-100/50" />
                     )}
                   </div>
                 </div>
               </div>
 
               {expandedPlugin === `${plugin.plugin_name}-${plugin.line_number}` && (
-                <div className="border-t border-white/10 p-3 bg-white/5">
+                <div className="border-t border-slate-800 p-3 bg-white/5">
                   <div className="space-y-3">
                     <div>
-                      <h4 className="font-medium text-white mb-1 text-sm">Usage Context</h4>
-                      <p className="text-xs text-white/80 font-mono bg-black p-2 rounded border border-white/10">
+                      <h4 className="font-medium text-slate-100 mb-1 text-sm">Usage Context</h4>
+                      <p className="text-xs text-slate-300 font-mono bg-slate-800 p-2 rounded border border-slate-600">
                         {plugin.usage_context}
                       </p>
                     </div>
 
                     <div>
-                      <h4 className="font-medium text-white mb-1 text-sm">Migration Notes</h4>
-                      <p className="text-xs text-white/80">{plugin.migration_notes}</p>
+                      <h4 className="font-medium text-slate-100 mb-1 text-sm">Migration Notes</h4>
+                      <p className="text-xs text-slate-100/80">{plugin.migration_notes}</p>
                     </div>
 
                     {plugin.gitlab_equivalent && (
                       <div>
-                        <h4 className="font-medium text-white mb-1 text-sm">GitLab Equivalent</h4>
-                        <p className="text-xs text-white/80 font-medium">{plugin.gitlab_equivalent}</p>
+                        <h4 className="font-medium text-slate-100 mb-1 text-sm">GitLab Equivalent</h4>
+                        <p className="text-xs text-slate-100/80 font-medium">{plugin.gitlab_equivalent}</p>
                       </div>
                     )}
 
@@ -834,10 +834,10 @@ function DryRunResultsView({
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center space-y-6">
-          <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto" />
+          <div className="w-16 h-16 border-4 border-muted border-t-primary rounded-full animate-spin mx-auto" />
           <div>
-            <h3 className="text-xl font-bold text-slate-900">Executing Dry-Run</h3>
-            <p className="text-slate-600 mt-2">Testing GitLab CI pipeline in sandbox environment...</p>
+            <h3 className="text-xl font-bold text-foreground">Executing Dry-Run</h3>
+            <p className="text-muted-foreground mt-2">Testing GitLab CI pipeline in sandbox environment...</p>
           </div>
         </div>
       </div>
@@ -848,16 +848,16 @@ function DryRunResultsView({
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center space-y-6">
-          <GitBranch className="w-16 h-16 text-slate-300 mx-auto" />
+          <GitBranch className="w-16 h-16 text-muted-foreground mx-auto" />
           <div>
-            <h3 className="text-xl font-bold text-slate-900">Ready for Dry-Run</h3>
-            <p className="text-slate-600 mt-2 mb-4">
+            <h3 className="text-xl font-bold text-foreground">Ready for Dry-Run</h3>
+            <p className="text-muted-foreground mt-2 mb-4">
               Execute your GitLab CI pipeline in a secure sandbox environment
             </p>
             <button
               onClick={onStartDryRun}
               disabled={!canStartDryRun}
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-md bg-white text-black hover:bg-white/90 ${!canStartDryRun ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 ${!canStartDryRun ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <Play className="w-4 h-4 mr-2" />
               Start Dry-Run
@@ -874,7 +874,7 @@ function DryRunResultsView({
   return (
     <div className="flex flex-col h-full">
       {/* Dry-Run Summary */}
-      <div className="p-6 bg-black border-b border-white/10">
+      <div className="p-6 bg-slate-950 border-b border-slate-800">
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
           <div className="text-center">
             <div className={`text-2xl font-bold ${
@@ -884,29 +884,29 @@ function DryRunResultsView({
             }`}>
               {dryRunResult.status.toUpperCase()}
             </div>
-            <div className="text-sm text-white/70">Pipeline Status</div>
+            <div className="text-sm text-slate-100/70">Pipeline Status</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-white">{dryRunResult.total_jobs}</div>
-            <div className="text-sm text-white/70">Total Jobs</div>
+            <div className="text-2xl font-bold text-slate-100">{dryRunResult.total_jobs}</div>
+            <div className="text-sm text-slate-100/70">Total Jobs</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-green-300">{dryRunResult.passed_jobs}</div>
-            <div className="text-sm text-white/70">Passed</div>
+            <div className="text-sm text-slate-100/70">Passed</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-red-300">{dryRunResult.failed_jobs}</div>
-            <div className="text-sm text-white/70">Failed</div>
+            <div className="text-sm text-slate-100/70">Failed</div>
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-yellow-300">{dryRunResult.warnings.length}</div>
-            <div className="text-sm text-white/70">Warnings</div>
+            <div className="text-sm text-slate-100/70">Warnings</div>
           </div>
         </div>
 
         {/* Success Rate */}
         <div className="mb-4">
-          <div className="flex justify-between text-sm font-medium text-white/80 mb-2">
+          <div className="flex justify-between text-sm font-medium text-slate-100/80 mb-2">
             <span>Success Rate</span>
             <span>{dryRunResult.summary.success_rate}%</span>
           </div>
@@ -924,7 +924,7 @@ function DryRunResultsView({
 
         {/* Migration Readiness */}
         <div className="flex items-center gap-4">
-          <span className="text-sm font-medium text-white/80">Migration Readiness:</span>
+          <span className="text-sm font-medium text-slate-100/80">Migration Readiness:</span>
           <span className={`px-3 py-1 rounded-full text-sm font-medium ${
             dryRunResult.summary.migration_readiness === 'ready' ? 'bg-white/10 text-green-300' :
             dryRunResult.summary.migration_readiness === 'needs_minor_fixes' ? 'bg-white/10 text-yellow-300' :
@@ -937,13 +937,13 @@ function DryRunResultsView({
 
       {/* Job Results */}
       <div className="flex-1 overflow-y-auto p-6">
-        <h3 className="font-semibold text-white mb-4">Job Results</h3>
+        <h3 className="font-semibold text-slate-100 mb-4">Job Results</h3>
         
         <div className="space-y-3">
           {dryRunResult.logs.map((job: JobLog) => (
             <div
               key={job.job_name}
-              className="bg-white/5 rounded-lg border border-white/10 overflow-hidden"
+              className="bg-white/5 rounded-lg border border-slate-800 overflow-hidden"
             >
               <div
                 className="p-4 cursor-pointer hover:bg-white/5 transition-colors"
@@ -960,8 +960,8 @@ function DryRunResultsView({
                     }`} />
                     
                     <div>
-                      <h4 className="font-semibold text-white">{job.job_name}</h4>
-                      <div className="flex items-center gap-4 text-sm text-white/60">
+                      <h4 className="font-semibold text-slate-100">{job.job_name}</h4>
+                      <div className="flex items-center gap-4 text-sm text-slate-100/60">
                         <span>Duration: {job.duration}s</span>
                         {job.warnings.length > 0 && (
                           <span>{job.warnings.length} warnings</span>
@@ -979,21 +979,21 @@ function DryRunResultsView({
                       {job.status}
                     </span>
                     {expandedJob === job.job_name ? (
-                      <ChevronDown className="w-4 h-4 text-white/50" />
+                      <ChevronDown className="w-4 h-4 text-slate-100/50" />
                     ) : (
-                      <ChevronRight className="w-4 h-4 text-white/50" />
+                      <ChevronRight className="w-4 h-4 text-slate-100/50" />
                     )}
                   </div>
                 </div>
               </div>
 
               {expandedJob === job.job_name && (
-                <div className="border-t border-white/10 p-4 bg-white/5">
+                <div className="border-t border-slate-800 p-4 bg-white/5">
                   <div className="space-y-4">
                     {job.error_message && (
                       <div>
-                        <h5 className="font-medium text-red-300 mb-2">Error Message</h5>
-                        <p className="text-sm text-red-200 bg-white/5 p-3 rounded border border-white/10">
+                        <h5 className="font-medium text-destructive mb-2">Error Message</h5>
+                        <p className="text-sm text-destructive bg-destructive/10 p-3 rounded border border-destructive/20">
                           {job.error_message}
                         </p>
                       </div>
@@ -1001,10 +1001,10 @@ function DryRunResultsView({
 
                     {job.warnings.length > 0 && (
                       <div>
-                        <h5 className="font-medium text-yellow-300 mb-2">Warnings</h5>
+                        <h5 className="font-medium text-yellow-500 mb-2">Warnings</h5>
                         <div className="space-y-1">
                           {job.warnings.map((warning, index) => (
-                            <p key={index} className="text-sm text-yellow-200 bg-white/5 p-2 rounded border border-white/10">
+                            <p key={index} className="text-sm text-yellow-600 bg-yellow-50/10 p-2 rounded border border-yellow-500/20">
                               {warning}
                             </p>
                           ))}
@@ -1014,16 +1014,16 @@ function DryRunResultsView({
 
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <h5 className="font-medium text-white">Job Logs</h5>
+                        <h5 className="font-medium text-slate-100">Job Logs</h5>
                         <button
                           onClick={() => copyToClipboard(job.log_content)}
-                          className="text-sm text-white hover:text-white/80 flex items-center gap-1"
+                          className="text-sm text-slate-100 hover:text-slate-100/80 flex items-center gap-1"
                         >
                           <Copy className="w-3 h-3" />
                           Copy
                         </button>
                       </div>
-                       <pre className="text-sm text-white/80 bg-black p-3 rounded border border-white/10 overflow-x-auto max-h-64">
+                       <pre className="text-sm text-slate-300 bg-slate-800 p-3 rounded border border-slate-600 overflow-x-auto max-h-64 dark-log-block">
                         {job.log_content.substring(0, 2000)}
                         {job.log_content.length > 2000 && '\n... [truncated]'}
                       </pre>
@@ -1038,18 +1038,18 @@ function DryRunResultsView({
         {/* Manual Steps */}
         {dryRunResult.manual_steps.length > 0 && (
           <div className="mt-8">
-            <h3 className="font-semibold text-white mb-4 flex items-center gap-2">
-              <List className="w-4 h-4 text-white" />
+            <h3 className="font-semibold text-slate-100 mb-4 flex items-center gap-2">
+              <List className="w-4 h-4 text-slate-100" />
               Manual Steps Required
             </h3>
-            <div className="bg-white/5 border border-white/10 rounded-lg p-4">
+            <div className="bg-white/5 border border-slate-800 rounded-lg p-4">
               <div className="space-y-2">
                 {dryRunResult.manual_steps.map((step: string, index: number) => (
                   <div key={index} className="flex items-start gap-2">
-                    <div className="w-6 h-6 bg-white/20 text-white text-xs rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">
+                    <div className="w-6 h-6 bg-white/20 text-slate-100 text-xs rounded-full flex items-center justify-center mt-0.5 flex-shrink-0">
                       {index + 1}
                     </div>
-                    <p className="text-sm text-white/80">{step}</p>
+                    <p className="text-sm text-slate-100/80">{step}</p>
                   </div>
                 ))}
               </div>
@@ -1094,15 +1094,15 @@ function GitLabCIView({
       <div className="h-full flex items-center justify-center p-8">
         <div className="text-center">
           <GitBranch className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-slate-900 mb-2">
+          <h3 className="text-xl font-semibold text-slate-100 mb-2">
             Generate GitLab CI Configuration
           </h3>
-          <p className="text-slate-600 mb-6 max-w-md">
+          <p className="text-slate-300 mb-6 max-w-md">
             Convert your Jenkins pipeline to a production-ready GitLab CI configuration
           </p>
           <button
             onClick={onGenerate}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-white text-black hover:bg-white/90"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700"
           >
             <GitBranch className="w-4 h-4" />
             Generate GitLab CI
@@ -1116,11 +1116,11 @@ function GitLabCIView({
     return (
       <div className="h-full flex items-center justify-center p-8">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-slate-900 mb-2">
+          <div className="w-12 h-12 border-4 border-slate-600 border-t-primary rounded-full animate-spin mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-slate-100 mb-2">
             Generating GitLab CI Configuration
           </h3>
-          <p className="text-slate-600">
+          <p className="text-slate-300">
             Creating production-ready GitLab CI YAML...
           </p>
         </div>
@@ -1131,27 +1131,27 @@ function GitLabCIView({
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="border-b border-slate-200 bg-white p-6">
+      <div className="border-b border-border bg-card p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900 mb-2">
+            <h2 className="text-2xl font-bold text-card-foreground mb-2">
               GitLab CI Configuration
             </h2>
-            <p className="text-slate-600">
+            <p className="text-muted-foreground">
               Production-ready GitLab CI YAML converted from your Jenkins pipeline
             </p>
           </div>
           <div className="flex items-center gap-3">
             <button
               onClick={() => copyToClipboard(gitlabYaml)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-white/10 bg-white/5 text-white hover:bg-white/10"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-slate-600 bg-slate-800 text-slate-100 hover:bg-slate-700"
             >
               <Copy className="w-4 h-4" />
               Copy
             </button>
             <button
               onClick={downloadYaml}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-white text-black hover:bg-white/90"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700"
             >
               <Download className="w-4 h-4" />
               Download
@@ -1161,10 +1161,10 @@ function GitLabCIView({
       </div>
 
       {/* YAML Content */}
-      <div className="flex-1 overflow-hidden bg-slate-50">
+      <div className="flex-1 overflow-hidden bg-slate-950">
         <div className="h-full p-6">
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-6 h-full overflow-auto">
-            <pre className="text-sm text-slate-900 font-mono whitespace-pre-wrap leading-relaxed">
+          <div className="bg-slate-900 border border-slate-700 rounded-lg p-6 h-full overflow-auto">
+            <pre className="text-sm text-slate-100 font-mono whitespace-pre-wrap leading-relaxed dark-code-block">
               {gitlabYaml}
             </pre>
           </div>

@@ -23,6 +23,19 @@ const nextConfig = {
             config: [__filename],
           },
         }
+        // Additional webpack optimization to prevent module resolution issues
+        config.optimization = {
+          ...config.optimization,
+          moduleIds: 'deterministic',
+          chunkIds: 'deterministic',
+        }
+        // Ensure proper module resolution
+        config.resolve = {
+          ...config.resolve,
+          fallback: {
+            ...config.resolve.fallback,
+          }
+        }
       }
     }
     return config
